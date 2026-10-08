@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Multi-Quest: Transports</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .title-font { font-family: 'Fredoka One', cursive; }
+
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), inset 0 -10px 0 rgba(0,0,0,0.05);
+            border: 6px solid #fff;
+            transition: all 0.3s ease;
+        }
+
+        .bounce-in { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Botões 3D para Game Modes */
+        .btn-mode {
+            transition: all 0.1s;
+            border-bottom-width: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-mode:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+            margin-top: 4px;
+        }
+        .btn-mode:hover::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shine 0.75s;
+        }
+        @keyframes shine { 100% { left: 200%; } }
+
+        /* Color Coding para ajudar ESL Kids */
+        .grammar-subject { color: #3b82f6; font-weight: 900; } /* Azul para I, He, She */
+        .grammar-verb { color: #8b5cf6; font-weight: 900; } /* Roxo para go, goes */
+        .grammar-place { color: #10b981; font-weight: 900; } /* Verde para lugares */
+        .grammar-transport { color: #f59e0b; font-weight: 900; } /* Laranja para transportes */
+
+        .word-block {
+            display: inline-block;
+            background: #fff;
+            border: 4px solid #e2e8f0;
+            border-bottom-width: 8px;
+            border-radius: 16px;
+            padding: 10px 20px;
+            margin: 8px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .word-block:active { transform: translateY(4px); border-bottom-width: 4px; }
+        .word-block.selected { background: #e0f2fe; border-color: #38bdf8; opacity: 0.5; pointer-events: none; }
+
+        .hidden-element { display: none !important; }
+        
+        .pulse-text { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- MENU PRINCIPAL -->
+    <div id="screen-menu" class="game-container max-w-4xl w-full p-10 text-center bounce-in z-10">
+        <h1 class="text-6xl text-purple-600 mb-2 title-font drop-shadow-md">Transport Multi-Quest!</h1>
+        <p class="text-2xl text-gray-500 mb-8 font-bold">Choose a Game Mode to play with the class!</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Mode 1 -->
+            <button onclick="startGame(1)" class="btn-mode bg-blue-400 border-blue-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-blue-300">
+                <span class="text-5xl mb-2">🪄</span>
+                <span class="text-2xl title-font">1. Missing Magic</span>
+                <span class="text-sm font-bold mt-2">Fill in the blanks!</span>
+            </button>
+            <!-- Mode 2 -->
+            <button onclick="startGame(2)" class="btn-mode bg-green-400 border-green-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-green-300">
+                <span class="text-5xl mb-2">🕵️</span>
+                <span class="text-2xl title-font">2. Detective</span>
+                <span class="text-sm font-bold mt-2">True or False?</span>
+            </button>
+            <!-- Mode 3 -->
+            <button onclick="startGame(3)" class="btn-mode bg-yellow-400 border-yellow-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-yellow-300">
+                <span class="text-5xl mb-2">🧱</span>
+                <span class="text-2xl title-font">3. Word Builder</span>
+                <span class="text-sm font-bold mt-2">Unscramble sentences</span>
+            </button>
+            <!-- Mode 4 -->
+            <button onclick="startGame(4)" class="btn-mode bg-pink-400 border-pink-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-pink-300">
+                <span class="text-5xl mb-2">❓</span>
+                <span class="text-2xl title-font">4. Mystery Person</span>
+                <span class="text-sm font-bold mt-2">Listen and choose</span>
+            </button>
+            <!-- Mode 5 -->
+            <button onclick="startGame(5)" class="btn-mode bg-red-500 border-red-700 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-red-400 lg:col-span-2">
+                <span class="text-5xl mb-2">🤖</span>
+                <span class="text-2xl title-font">5. The Negative Machine</span>
+                <span class="text-sm font-bold mt-2">Change YES to NO!</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TELA DO JOGO (Dinâmica) -->
+    <div id="screen-game" class="game-container max-w-5xl w-full p-8 text-center hidden flex-col z-10">
+        
+        <!-- Header do Jogo -->
+        <div class="flex justify-between items-center mb-6 border-b-4 border-gray-100 pb-4">
+            <button onclick="returnToMenu()" class="text-gray-400 hover:text-red-500 font-bold text-xl flex items-center gap-2">
+                ◀ Menu
+            </button>
+            <div class="text-3xl title-font text-purple-500" id="mode-title">Mode Name</div>
+            <div class="bg-yellow-400 text-yellow-900 border-b-4 border-yellow-600 px-6 py-2 rounded-full text-3xl title-font shadow-md flex items-center gap-2">
+                ⭐ <span id="score">0</span>
+            </div>
+        </div>
+
+        <!-- Área Dinâmica de Conteúdo onde os modos serão renderizados -->
+        <div id="game-content-area" class="min-h-[350px] flex flex-col justify-center items-center bg-gray-50 p-8 rounded-3xl shadow-inner border-4 border-dashed border-gray-300 relative overflow-hidden mb-6">
+            <!-- Conteúdo injetado via JS -->
+        </div>
+
+        <!-- Teacher Controls -->
+        <div class="bg-white p-6 rounded-2xl border-4 border-gray-200 shadow-sm">
+            <p class="text-gray-400 text-sm font-bold uppercase mb-4 tracking-widest">🕹️ Teacher Controls</p>
+            
+            <div id="controls-default" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="handleReveal()" id="btn-reveal" class="btn-mode bg-blue-500 border-blue-700 text-white text-2xl py-4 rounded-xl title-font hover:bg-blue-400">
+                    👀 Reveal Answer
+                </button>
+                <button onclick="nextQuestion()" class="btn-mode bg-gray-400 border-gray-600 text-white text-2xl py-4 rounded-xl title-font hover:bg-gray-300">
+                    ⏭️ Skip
+                </button>
+            </div>
+
+            <!-- Botões que aparecem após revelar -->
+            <div id="controls-judge" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="markCorrect()" class="btn-mode bg-green-500 border-green-700 text-white text-3xl py-4 rounded-xl title-font hover:bg-green-400">
+                    🎉 CORRECT! (+10)
+                </button>
+                <button onclick="nextQuestion()" class="btn-mode bg-red-500 border-red-700 text-white text-3xl py-4 rounded-xl title-font hover:bg-red-400">
+                    😅 OOPS! (Next)
+                </button>
+            </div>
+            
+            <!-- Controles Específicos para Mode 2 (True/False) e Mode 4 -->
+            <div id="controls-tf" class="hidden grid grid-cols-2 gap-4">
+                <button onclick="checkTF(true)" class="btn-mode bg-green-500 border-green-700 text-white text-3xl py-6 rounded-xl title-font hover:bg-green-400">
+                    ✅ TRUE
+                </button>
+                <button onclick="checkTF(false)" class="btn-mode bg-red-500 border-red-700 text-white text-3xl py-6 rounded-xl title-font hover:bg-red-400">
+                    ❌ FALSE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA BANKS FOR EACH MODE ---
+
+        // Mode 1: Missing Magic (27 levels)
+        const dataMode1 = [
+            // Round 1 (Alunos 1 a 9)
+            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>train</span>.", answer: "goes", emoji: "👦 🚆" },
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>school</span> by #BLANK#.", answer: "helicopter", emoji: "🚁 ❌" },
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>motorcycle</span>.", answer: "doesn't go", emoji: "👧 🏍️ ❌" },
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>go</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "car", emoji: "🏔️ 🚗" },
+            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the park</span> by #BLANK#.", answer: "airplane", emoji: "✈️ ❌" },
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the movie theater</span> by <span class='grammar-transport'>bus</span>.", answer: "goes", emoji: "👧 🚌 🍿" },
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the mall</span> by #BLANK#.", answer: "bike", emoji: "🚲 ❌" },
+            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>boat</span>.", answer: "goes", emoji: "👦 ⛵ 🏖️" },
+            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>school</span> by #BLANK#.", answer: "car", emoji: "🚗 ❌ 🏫" },
+            
+            // Round 2 (Alunos 1 a 9)
+            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>the zoo</span> by <span class='grammar-transport'>bus</span>.", answer: "go", emoji: "🦁 🚌" },
+            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "train", emoji: "👦 🚆 🏔️" },
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the park</span> by <span class='grammar-transport'>bike</span>.", answer: "doesn't go", emoji: "👧 🚲 ❌" },
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the beach</span> by #BLANK#.", answer: "motorcycle", emoji: "🏍️ ❌ 🏖️" },
+            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the movie theater</span> by <span class='grammar-transport'>car</span>.", answer: "goes", emoji: "👦 🚗 🍿" },
+            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mall</span> by #BLANK#.", answer: "helicopter", emoji: "👧 🚁 🛍️" },
+            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>school</span> by <span class='grammar-transport'>train</span>.", answer: "don't go", emoji: "🏫 🚆 ❌" },
+            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the zoo</span> by #BLANK#.", answer: "bus", emoji: "👦 🚌 ❌" },
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>boat</span>.", answer: "goes", emoji: "👧 ⛵ 🏖️" },
+
+            // Round 3 (Alunos 1 a 9)
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>go</span> to <span class='grammar-place'>the movie theater</span> by #BLANK#.", answer: "bike", emoji: "🍿 🚲" },
+            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>school</span> by <span class='grammar-transport'>airplane</span>.", answer: "doesn't go", emoji: "👦 ✈️ ❌" },
+            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "car", emoji: "👧 🚗 🏔️" },
+            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>bus</span>.", answer: "go", emoji: "🛍️ 🚌" },
+            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the park</span> by #BLANK#.", answer: "motorcycle", emoji: "👦 🏍️ 🌳" },
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the zoo</span> by <span class='grammar-transport'>train</span>.", answer: "doesn't go", emoji: "👧 🚆 ❌" },
+            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the beach</span> by #BLANK#.", answer: "boat", emoji: "🏖️ ⛵ ❌" },
+            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>helicopter</span>.", answer: "goes", emoji: "👦 🚁 🛍️" },
+            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "bike", emoji: "👧 🚲 ❌" }
+        ];
+
+        // Mode 2: True or False (27 levels)
+        const dataMode2 = [
+            // Round 1
+            { emoji: "👦 🚌 🏫", text: "He goes to school by bus.", isTrue: true },
+            { emoji: "👧 🚁 🏖️", text: "She goes to the beach by car.", isTrue: false },
+            { emoji: "👦 ❌ 🚆", text: "He doesn't go by train.", isTrue: true },
+            { emoji: "👩 ✈️ 🏔️", text: "She doesn't go to the mountains by airplane.", isTrue: false },
+            { emoji: "🚗 🛍️ ✅", text: "I go to the mall by car.", isTrue: true },
+            { emoji: "🚲 🌳 ❌", text: "I go to the park by bike.", isTrue: false },
+            { emoji: "👦 ⛵ 🏖️", text: "He goes to the beach by boat.", isTrue: true },
+            { emoji: "👧 🏍️ 🍿", text: "She goes to the movie theater by train.", isTrue: false },
+            { emoji: "🚁 🏫 ❌", text: "I don't go to school by helicopter.", isTrue: true },
+            
+            // Round 2
+            { emoji: "👦 🚲 🌳", text: "He goes to the park by bike.", isTrue: true },
+            { emoji: "👧 ❌ 🚌", text: "She goes to school by bus.", isTrue: false },
+            { emoji: "✈️ 🏔️ ✅", text: "I go to the mountains by airplane.", isTrue: true },
+            { emoji: "👦 🚗 🛍️", text: "He doesn't go to the mall by car.", isTrue: false },
+            { emoji: "👧 🚆 🦁", text: "She goes to the zoo by train.", isTrue: true },
+            { emoji: "⛵ 🏖️ ❌", text: "I don't go to the beach by boat.", isTrue: true },
+            { emoji: "👦 🚁 🍿", text: "He goes to the movie theater by helicopter.", isTrue: true },
+            { emoji: "👧 ❌ 🏍️", text: "She goes to the park by motorcycle.", isTrue: false },
+            { emoji: "🚌 🏫 ✅", text: "I go to school by bus.", isTrue: true },
+
+            // Round 3
+            { emoji: "👦 ❌ ✈️", text: "He doesn't go by airplane.", isTrue: true },
+            { emoji: "👧 🚗 🏔️", text: "She goes to the beach by car.", isTrue: false },
+            { emoji: "🚆 🛍️ ✅", text: "I go to the mall by train.", isTrue: true },
+            { emoji: "👦 🚲 🏫", text: "He doesn't go to school by bike.", isTrue: false },
+            { emoji: "👧 ⛵ 🏖️", text: "She goes to the beach by boat.", isTrue: true },
+            { emoji: "🏍️ 🦁 ❌", text: "I don't go to the zoo by motorcycle.", isTrue: true },
+            { emoji: "👦 🚌 🌳", text: "He goes to the park by bus.", isTrue: true },
+            { emoji: "👧 ❌ 🚁", text: "She goes to the mall by helicopter.", isTrue: false },
+            { emoji: "🚗 🍿 ✅", text: "I go to the movie theater by car.", isTrue: true }
+        ];
+
+        // Mode 3: Word Builder (27 levels)
+        const dataMode3 = [
+            // Round 1
+            { words: ["She", "goes", "to", "school", "by", "bus."], emoji: "👧 🏫 🚌" },
+            { words: ["He", "doesn't", "go", "by", "train."], emoji: "👦 ❌ 🚆" },
+            { words: ["I", "go", "to", "the mall", "by", "car."], emoji: "🛍️ 🚗 ✅" },
+            { words: ["I", "don't", "go", "by", "helicopter."], emoji: "🚁 ❌" },
+            { words: ["He", "goes", "to", "the park", "by", "bike."], emoji: "👦 🌳 🚲" },
+            { words: ["She", "doesn't", "go", "to", "the beach."], emoji: "👧 🏖️ ❌" },
+            { words: ["I", "go", "to", "the zoo", "by", "bus."], emoji: "🦁 🚌 ✅" },
+            { words: ["He", "doesn't", "go", "by", "motorcycle."], emoji: "👦 🏍️ ❌" },
+            { words: ["She", "goes", "to", "the mountains", "by", "train."], emoji: "👧 🏔️ 🚆" },
+
+            // Round 2
+            { words: ["I", "don't", "go", "to", "school", "by", "car."], emoji: "🏫 🚗 ❌" },
+            { words: ["He", "goes", "to", "the mall", "by", "helicopter."], emoji: "👦 🛍️ 🚁" },
+            { words: ["She", "doesn't", "go", "by", "boat."], emoji: "👧 ⛵ ❌" },
+            { words: ["I", "go", "to", "the beach", "by", "airplane."], emoji: "🏖️ ✈️ ✅" },
+            { words: ["He", "doesn't", "go", "to", "the zoo."], emoji: "👦 🦁 ❌" },
+            { words: ["She", "goes", "to", "the park", "by", "car."], emoji: "👧 🌳 🚗" },
+            { words: ["I", "don't", "go", "by", "bike."], emoji: "🚲 ❌" },
+            { words: ["He", "goes", "to", "the movie theater", "by", "bus."], emoji: "👦 🍿 🚌" },
+            { words: ["She", "doesn't", "go", "by", "train."], emoji: "👧 🚆 ❌" },
+
+            // Round 3
+            { words: ["I", "go", "to", "the mountains", "by", "car."], emoji: "🏔️ 🚗 ✅" },
+            { words: ["He", "doesn't", "go", "to", "school", "by", "bus."], emoji: "👦 🏫 🚌 ❌" },
+            { words: ["She", "goes", "to", "the mall", "by", "bike."], emoji: "👧 🛍️ 🚲" },
+            { words: ["I", "don't", "go", "to", "the beach", "by", "helicopter."], emoji: "🏖️ 🚁 ❌" },
+            { words: ["He", "goes", "by", "motorcycle."], emoji: "👦 🏍️ ✅" },
+            { words: ["She", "doesn't", "go", "to", "the park."], emoji: "👧 🌳 ❌" },
+            { words: ["I", "go", "to", "school", "by", "train."], emoji: "🏫 🚆 ✅" },
+            { words: ["He", "doesn't", "go", "by", "airplane."], emoji: "👦 ✈️ ❌" },
+            { words: ["She", "goes", "to", "the zoo", "by", "boat."], emoji: "👧 🦁 ⛵" }
+        ];
+
+        // Mode 4: Mystery Person (A or B) (27 levels)
+        const dataMode4 = [
+            // Round 1
+            { clue: "I don't go to school by bus. I go by car.", optA: { emoji: "👧 🚌", label: "Mary" }, optB: { emoji: "👦 🚗", label: "Peter" }, correct: 'B' },
+            { clue: "She goes to the beach by helicopter.", optA: { emoji: "👩 🚁", label: "Sally" }, optB: { emoji: "👩 ✈️", label: "Jane" }, correct: 'A' },
+            { clue: "He doesn't go to the mall by bike. He goes by motorcycle.", optA: { emoji: "👦 🚲", label: "Tom" }, optB: { emoji: "👦 🏍️", label: "Bob" }, correct: 'B' },
+            { clue: "I go to the park by bus. I don't go by train.", optA: { emoji: "🧑 🚌", label: "Alex" }, optB: { emoji: "🧑 🚆", label: "Sam" }, correct: 'A' },
+            { clue: "She doesn't go to the mountains by car. She goes by train.", optA: { emoji: "👧 🚆", label: "Lily" }, optB: { emoji: "👧 🚗", label: "Mia" }, correct: 'A' },
+            { clue: "He goes to the zoo by bike.", optA: { emoji: "👦 🚲", label: "Leo" }, optB: { emoji: "👦 🚗", label: "Max" }, correct: 'A' },
+            { clue: "I don't go to the movie theater by motorcycle. I go by bus.", optA: { emoji: "🧑 🏍️", label: "Chris" }, optB: { emoji: "🧑 🚌", label: "Pat" }, correct: 'B' },
+            { clue: "She goes to school by boat.", optA: { emoji: "👧 ⛵", label: "Zoe" }, optB: { emoji: "👧 🚌", label: "Amy" }, correct: 'A' },
+            { clue: "He doesn't go to the beach by helicopter. He goes by airplane.", optA: { emoji: "👦 ✈️", label: "Dan" }, optB: { emoji: "👦 🚁", label: "Tim" }, correct: 'A' },
+            
+            // Round 2
+            { clue: "I go to the mall by car. I don't go by bus.", optA: { emoji: "🧑 🚌", label: "Kelly" }, optB: { emoji: "🧑 🚗", label: "Jordan" }, correct: 'B' },
+            { clue: "She doesn't go to the park by bike. She goes by car.", optA: { emoji: "👩 🚗", label: "Nina" }, optB: { emoji: "👩 🚲", label: "Lara" }, correct: 'A' },
+            { clue: "He goes to the mountains by helicopter.", optA: { emoji: "👦 ✈️", label: "Paul" }, optB: { emoji: "👦 🚁", label: "Mark" }, correct: 'B' },
+            { clue: "I don't go to school by train. I go by bike.", optA: { emoji: "🧑 🚲", label: "Ryan" }, optB: { emoji: "🧑 🚆", label: "Sean" }, correct: 'A' },
+            { clue: "She goes to the zoo by bus.", optA: { emoji: "👧 🚌", label: "Emma" }, optB: { emoji: "👧 🚗", label: "Chloe" }, correct: 'A' },
+            { clue: "He doesn't go to the movie theater by car. He goes by train.", optA: { emoji: "👦 🚗", label: "Noah" }, optB: { emoji: "👦 🚆", label: "Liam" }, correct: 'B' },
+            { clue: "I go to the beach by motorcycle. I don't go by boat.", optA: { emoji: "🧑 🏍️", label: "Jay" }, optB: { emoji: "🧑 ⛵", label: "Ray" }, correct: 'A' },
+            { clue: "She doesn't go to the mall by airplane. She goes by helicopter.", optA: { emoji: "👩 🚁", label: "Sara" }, optB: { emoji: "👩 ✈️", label: "Tara" }, correct: 'A' },
+            { clue: "He goes to the park by bus.", optA: { emoji: "👦 🚗", label: "Luke" }, optB: { emoji: "👦 🚌", label: "Jack" }, correct: 'B' },
+
+            // Round 3
+            { clue: "I don't go to the zoo by bike. I go by car.", optA: { emoji: "🧑 🚗", label: "Drew" }, optB: { emoji: "🧑 🚲", label: "Finn" }, correct: 'A' },
+            { clue: "She goes to the mountains by train.", optA: { emoji: "👧 🚆", label: "Ruby" }, optB: { emoji: "👧 🚌", label: "Jade" }, correct: 'A' },
+            { clue: "He doesn't go to school by motorcycle. He goes by bike.", optA: { emoji: "👦 🏍️", label: "Eli" }, optB: { emoji: "👦 🚲", label: "Ian" }, correct: 'B' },
+            { clue: "I go to the mall by helicopter. I don't go by airplane.", optA: { emoji: "🧑 ✈️", label: "Gabe" }, optB: { emoji: "🧑 🚁", label: "Owen" }, correct: 'B' },
+            { clue: "She doesn't go to the movie theater by train. She goes by bus.", optA: { emoji: "👩 🚌", label: "Fay" }, optB: { emoji: "👩 🚆", label: "Kay" }, correct: 'A' },
+            { clue: "He goes to the beach by boat.", optA: { emoji: "👦 ⛵", label: "Cody" }, optB: { emoji: "👦 🚗", label: "Zack" }, correct: 'A' },
+            { clue: "I don't go to the park by car. I go by motorcycle.", optA: { emoji: "🧑 🏍️", label: "Toby" }, optB: { emoji: "🧑 🚗", label: "Seth" }, correct: 'A' },
+            { clue: "She goes to the zoo by airplane.", optA: { emoji: "👧 🚁", label: "Eva" }, optB: { emoji: "👧 ✈️", label: "Ava" }, correct: 'B' },
+            { clue: "He doesn't go to the mountains by bus. He goes by car.", optA: { emoji: "👦 🚗", label: "Rex" }, optB: { emoji: "👦 🚌", label: "Jed" }, correct: 'A' }
+        ];
+
+        // Mode 5: Negative Machine (27 levels)
+        const dataMode5 = [
+            // Round 1
+            { pos: "I go to school by bus.", neg: "I don't go to school by bus." },
+            { pos: "He goes to the mall by car.", neg: "He doesn't go to the mall by car." },
+            { pos: "She goes by train.", neg: "She doesn't go by train." },
+            { pos: "I go to the beach by motorcycle.", neg: "I don't go to the beach by motorcycle." },
+            { pos: "He goes to the mountains by helicopter.", neg: "He doesn't go to the mountains by helicopter." },
+            { pos: "She goes to the park by bike.", neg: "She doesn't go to the park by bike." },
+            { pos: "I go to the zoo by train.", neg: "I don't go to the zoo by train." },
+            { pos: "He goes to the movie theater by bus.", neg: "He doesn't go to the movie theater by bus." },
+            { pos: "She goes to the beach by boat.", neg: "She doesn't go to the beach by boat." },
+            
+            // Round 2
+            { pos: "I go to the mall by airplane.", neg: "I don't go to the mall by airplane." },
+            { pos: "He goes to school by bike.", neg: "He doesn't go to school by bike." },
+            { pos: "She goes to the mountains by car.", neg: "She doesn't go to the mountains by car." },
+            { pos: "I go to the park by motorcycle.", neg: "I don't go to the park by motorcycle." },
+            { pos: "He goes to the zoo by helicopter.", neg: "He doesn't go to the zoo by helicopter." },
+            { pos: "She goes to the mall by bus.", neg: "She doesn't go to the mall by bus." },
+            { pos: "I go to the beach by train.", neg: "I don't go to the beach by train." },
+            { pos: "He goes to the movie theater by car.", neg: "He doesn't go to the movie theater by car." },
+            { pos: "She goes to school by motorcycle.", neg: "She doesn't go to school by motorcycle." },
+
+            // Round 3
+            { pos: "I go to the mountains by bike.", neg: "I don't go to the mountains by bike." },
+            { pos: "He goes to the park by boat.", neg: "He doesn't go to the park by boat." },
+            { pos: "She goes to the zoo by train.", neg: "She doesn't go to the zoo by train." },
+            { pos: "I go to the movie theater by helicopter.", neg: "I don't go to the movie theater by helicopter." },
+            { pos: "He goes to the beach by airplane.", neg: "He doesn't go to the beach by airplane." },
+            { pos: "She goes to the mall by motorcycle.", neg: "She doesn't go to the mall by motorcycle." },
+            { pos: "I go to school by boat.", neg: "I don't go to school by boat." },
+            { pos: "He goes to the mountains by bus.", neg: "He doesn't go to the mountains by bus." },
+            { pos: "She goes to the park by car.", neg: "She doesn't go to the park by car." }
+        ];
+
+        // --- GAME STATE ---
+        let currentMode = 0;
+        let currentLevel = 0;
+        let score = 0;
+        let currentData = [];
+        let builderSelectedWords = []; // Para o modo 3
+
+        // --- DOM ELEMENTS ---
+        const ui = {
+            menu: document.getElementById('screen-menu'),
+            game: document.getElementById('screen-game'),
+            contentArea: document.getElementById('game-content-area'),
+            title: document.getElementById('mode-title'),
+            score: document.getElementById('score'),
+            controlsDefault: document.getElementById('controls-default'),
+            controlsJudge: document.getElementById('controls-judge'),
+            controlsTF: document.getElementById('controls-tf')
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function returnToMenu() {
+            ui.game.classList.add('hidden');
+            ui.menu.classList.remove('hidden');
+            ui.menu.classList.add('bounce-in');
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            currentLevel = 0;
+            currentData = eval(`dataMode${mode}`); // Carrega o banco de dados correspondente
+            
+            // Setup UI
+            ui.menu.classList.add('hidden');
+            ui.game.classList.remove('hidden');
+            ui.game.classList.add('bounce-in');
+            
+            const titles = ["", "1. Missing Magic 🪄", "2. Detective 🕵️", "3. Word Builder 🧱", "4. Mystery Person ❓", "5. The Negative Machine 🤖"];
+            ui.title.innerText = titles[mode];
+
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevel >= currentData.length) {
+                currentLevel = 0; // Loop infinito para a aula não parar
+            }
+
+            const data = currentData[currentLevel];
+            ui.contentArea.innerHTML = ""; // Limpa a tela
+            
+            // Reset Controls
+            ui.controlsDefault.classList.remove('hidden');
+            ui.controlsJudge.classList.add('hidden');
+            ui.controlsTF.classList.add('hidden');
+
+            // --- RENDER MODE 1: Missing Magic ---
+            if (currentMode === 1) {
+                ui.contentArea.innerHTML = `
+                    <div class="text-8xl mb-6 pulse-text">${data.emoji}</div>
+                    <h2 class="text-5xl leading-relaxed text-gray-700 title-font bg-white p-8 rounded-3xl border-4 border-dashed border-blue-300 w-full">
+                        ${data.text.replace('#BLANK#', '<span id="blank-space" class="inline-block min-w-[200px] border-b-8 border-dashed border-red-500 text-red-500 pb-2 mx-4 bg-red-50 rounded-t-xl">????</span>')}
+                    </h2>
+                `;
+            }
+
+            // --- RENDER MODE 2: True or False ---
+            else if (currentMode === 2) {
+                ui.controlsDefault.classList.add('hidden');
+                ui.controlsTF.classList.remove('hidden'); // Usa botões TF
+
+                ui.contentArea.innerHTML = `
+                    <div class="text-9xl mb-8">${data.emoji}</div>
+                    <div class="bg-blue-100 p-6 rounded-3xl border-4 border-blue-300 w-full relative">
+                        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-2 rounded-full font-bold">Alien says:</div>
+                        <h2 class="text-6xl text-gray-800 title-font mt-4">"${data.text}"</h2>
+                    </div>
+                    <div id="tf-feedback" class="text-5xl title-font mt-6 h-12 hidden"></div>
+                `;
+            }
+
+            // --- RENDER MODE 3: Word Builder ---
+            else if (currentMode === 3) {
+                ui.controlsDefault.classList.add('hidden'); // Esconde controles padrão
+                builderSelectedWords = [];
+                
+                // Embaralhar palavras
+                let shuffled = [...data.words].sort(() => Math.random() - 0.5);
+                
+                let blocksHTML = shuffled.map((word, index) => 
+                    `<div class="word-block title-font text-blue-600" onclick="selectWord(this)">${word}</div>`
+                ).join('');
+
+                ui.contentArea.innerHTML = `
+                    <div class="text-7xl mb-6">${data.emoji}</div>
+                    
+                    <!-- Caixa de Resposta (Vazia no começo) -->
+                    <div id="builder-answer" class="min-h-[100px] w-full bg-white border-4 border-dashed border-gray-400 rounded-2xl mb-8 p-4 flex flex-wrap justify-center items-center gap-2">
+                        <span class="text-gray-300 text-2xl font-bold uppercase">Click blocks to build sentence</span>
+                    </div>
+                    
+                    <!-- Blocos de Palavras -->
+                    <div class="flex flex-wrap justify-center">
+                        ${blocksHTML}
+                    </div>
+
+                    <div class="mt-8 flex gap-4">
+                        <button onclick="checkBuilder()" class="btn-mode bg-green-500 text-white text-2xl py-3 px-8 rounded-xl title-font border-green-700">Check Answer ✅</button>
+                        <button onclick="loadLevel()" class="btn-mode bg-orange-400 text-white text-2xl py-3 px-8 rounded-xl title-font border-orange-600">Reset 🔄</button>
+                    </div>
+                `;
+            }
+
+            // --- RENDER MODE 4: Mystery Person ---
+            else if (currentMode === 4) {
+                ui.controlsDefault.classList.add('hidden');
+                
+                ui.contentArea.innerHTML = `
+                    <div class="bg-purple-100 p-6 rounded-3xl border-4 border-purple-300 w-full mb-8 shadow-md">
+                        <h2 class="text-4xl text-gray-800 title-font leading-relaxed">"${data.clue}"</h2>
+                    </div>
+                    <div class="flex gap-8 w-full justify-center">
+                        <button onclick="checkMystery('A')" class="btn-mode flex-1 bg-white border-4 border-gray-300 hover:border-blue-500 rounded-3xl p-8 flex flex-col items-center">
+                            <span class="text-8xl mb-4">${data.optA.emoji}</span>
+                            <span class="text-3xl title-font text-blue-600">${data.optA.label}</span>
+                        </button>
+                        <button onclick="checkMystery('B')" class="btn-mode flex-1 bg-white border-4 border-gray-300 hover:border-blue-500 rounded-3xl p-8 flex flex-col items-center">
+                            <span class="text-8xl mb-4">${data.optB.emoji}</span>
+                            <span class="text-3xl title-font text-blue-600">${data.optB.label}</span>
+                        </button>
+                    </div>
+                `;
+            }
+
+            // --- RENDER MODE 5: Negative Machine ---
+            else if (currentMode === 5) {
+                ui.contentArea.innerHTML = `
+                    <div class="text-8xl mb-4 pulse-text">⚙️🤖</div>
+                    <h2 class="text-5xl text-gray-700 title-font bg-white p-6 rounded-2xl border-4 border-gray-300 mb-6 w-full">
+                        ${data.pos}
+                    </h2>
+                    <div class="text-4xl font-black text-red-500 mb-4 tracking-widest">⬇️ SHOUT THE NEGATIVE! ⬇️</div>
+                    <div id="neg-answer" class="text-5xl text-white title-font bg-red-500 p-6 rounded-2xl w-full hidden border-4 border-red-700">
+                        ${data.neg}
+                    </div>
+                `;
+            }
+        }
+
+
+        // Ações do Professor (Modo 1 e 5)
+        function handleReveal() {
+            if (currentMode === 1) {
+                const blank = document.getElementById('blank-space');
+                blank.innerHTML = currentData[currentLevel].answer.toUpperCase();
+                blank.className = "inline-block px-6 py-2 bg-green-100 text-green-600 border-b-8 border-green-500 rounded-xl bounce-in";
+            } 
+            else if (currentMode === 5) {
+                document.getElementById('neg-answer').classList.remove('hidden');
+                document.getElementById('neg-answer').classList.add('bounce-in');
+            }
+            
+            ui.controlsDefault.classList.add('hidden');
+            ui.controlsJudge.classList.remove('hidden');
+        }
+
+        // Ações Modo 2 (True/False)
+        function checkTF(guess) {
+            const isCorrect = guess === currentData[currentLevel].isTrue;
+            const fb = document.getElementById('tf-feedback');
+            fb.classList.remove('hidden');
+            
+            if (isCorrect) {
+                fb.innerHTML = "🎉 CORRECT!";
+                fb.className = "text-6xl title-font mt-6 text-green-500 bounce-in";
+                markCorrect();
+            } else {
+                fb.innerHTML = "❌ OOPS! WRONG!";
+                fb.className = "text-6xl title-font mt-6 text-red-500 bounce-in";
+                setTimeout(nextQuestion, 2000);
+            }
+        }
+
+        // Ações Modo 3 (Word Builder)
+        function selectWord(element) {
+            const word = element.innerText;
+            element.classList.add('selected');
+            builderSelectedWords.push(word);
+            
+            const answerBox = document.getElementById('builder-answer');
+            if (builderSelectedWords.length === 1) answerBox.innerHTML = ""; // limpa placeholder
+            
+            const newBlock = document.createElement('div');
+            newBlock.className = "word-block title-font text-white bg-blue-500 border-blue-700 bounce-in";
+            newBlock.innerText = word;
+            answerBox.appendChild(newBlock);
+        }
+
+        function checkBuilder() {
+            const data = currentData[currentLevel];
+            const currentSentence = builderSelectedWords.join(" ");
+            const targetSentence = data.words.join(" ");
+            
+            if (currentSentence === targetSentence) {
+                markCorrect();
+            } else {
+                const answerBox = document.getElementById('builder-answer');
+                answerBox.classList.add('bg-red-100', 'border-red-500');
+                setTimeout(() => {
+                    answerBox.classList.remove('bg-red-100', 'border-red-500');
+                    loadLevel(); // reset
+                }, 1500);
+            }
+        }
+
+        // Ações Modo 4 (Mystery Person)
+        function checkMystery(guess) {
+            if (guess === currentData[currentLevel].correct) {
+                markCorrect();
+            } else {
+                nextQuestion(); // Pula sem ponto
+            }
+        }
+
+        function markCorrect() {
+            fireConfetti();
+            score += 10;
+            ui.score.innerText = score;
+            ui.score.parentElement.classList.add('scale-125', 'bg-yellow-300');
+            setTimeout(() => {
+                ui.score.parentElement.classList.remove('scale-125', 'bg-yellow-300');
+                nextQuestion(); // Agora SIM avança para TODOS os modos automaticamente
+            }, 1500); // 1.5 segundos de festa com confetes antes de pular a pergunta
+        }
+
+        function nextQuestion() {
+            currentLevel++;
+            ui.contentArea.style.opacity = 0;
+            setTimeout(() => {
+                loadLevel();
+                ui.contentArea.style.opacity = 1;
+            }, 300);
+        }
+
+        function fireConfetti() {
+            var duration = 2000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#8b5cf6', '#ef4444', '#ec4899'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+    </script>
+</body>
+</html>
