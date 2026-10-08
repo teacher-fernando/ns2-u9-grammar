@@ -7,6 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
@@ -92,6 +93,33 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+
+        /* --- STYLES DA LOJINHA E DO MASCOTE 3D --- */
+        .shop-container {
+            background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: radial-gradient(circle, #f5f6fa 0%, #dcdde1 100%);
+            border: 4px solid #7f8fa6;
+        }
+
+        /* Estilos dos Itens da Loja */
+        .shop-item {
+            background: white;
+            border: 4px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .shop-item:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .shop-item.locked { filter: grayscale(0.5); opacity: 0.8; }
+        .shop-item.equipped { border-color: #3b82f6; background: #eff6ff; }
     </style>
 </head>
 
@@ -99,7 +127,15 @@
 
     <!-- MENU PRINCIPAL -->
     <div id="screen-menu" class="game-container max-w-4xl w-full p-10 text-center bounce-in z-10">
-        <h1 class="text-6xl text-purple-600 mb-2 title-font drop-shadow-md">Transport Multi-Quest!</h1>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-6xl text-purple-600 title-font drop-shadow-md">Transport Quest!</h1>
+            
+            <!-- Botão da Lojinha -->
+            <button onclick="openShop()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 border-b-8 border-yellow-600 px-6 py-4 rounded-3xl text-3xl title-font shadow-lg flex items-center gap-3 transition-transform hover:scale-105 active:translate-y-2 active:border-b-0">
+                🛒 Shop <span class="bg-white px-3 py-1 rounded-xl">⭐ <span id="menu-score">0</span></span>
+            </button>
+        </div>
+        
         <p class="text-2xl text-gray-500 mb-8 font-bold">Choose a Game Mode to play with the class!</p>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -133,6 +169,33 @@
                 <span class="text-2xl title-font">5. The Negative Machine</span>
                 <span class="text-sm font-bold mt-2">Change YES to NO!</span>
             </button>
+        </div>
+    </div>
+
+    <!-- TELA DA LOJINHA (SHOP) -->
+    <div id="screen-shop" class="game-container shop-container max-w-5xl w-full p-8 hidden flex-col z-10">
+        <div class="flex justify-between items-center mb-6 border-b-4 border-white pb-4">
+            <button onclick="closeShop()" class="text-gray-600 hover:text-red-500 font-bold text-2xl flex items-center gap-2 bg-white px-6 py-2 rounded-full shadow-sm">
+                ◀ Back to Game
+            </button>
+            <div class="text-5xl title-font text-purple-600 drop-shadow-sm">Mascot Shop 🛍️</div>
+            <div class="bg-yellow-400 text-yellow-900 border-b-4 border-yellow-600 px-6 py-2 rounded-full text-3xl title-font shadow-md flex items-center gap-2">
+                ⭐ <span id="shop-score">0</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8 items-center justify-center min-h-[400px]">
+            
+            <!-- O Mascote 3D (Renderizado pelo Three.js) -->
+            <div class="w-full md:w-1/3 flex flex-col items-center justify-center bg-white/50 rounded-3xl p-6 border-4 border-white shadow-inner">
+                <div id="canvas-container"></div>
+                <p class="mt-4 text-xl font-bold text-gray-600 title-font bg-white px-6 py-2 rounded-full shadow">Class Mascot 🤖</p>
+            </div>
+
+            <!-- Grade de Roupas/Itens -->
+            <div class="w-full md:w-2/3 grid grid-cols-2 lg:grid-cols-3 gap-4" id="shop-items-grid">
+                <!-- Itens injetados via JS -->
+            </div>
         </div>
     </div>
 
@@ -373,6 +436,18 @@
             { pos: "She goes to the park by car.", neg: "She doesn't go to the park by car." }
         ];
 
+        // --- SHOP & MASCOT STATE ---
+        let shopItems = [
+            { id: 'hat1', name: 'Cool Cap', type: 'head', price: 30, emoji: '🧢', unlocked: false, equipped: false },
+            { id: 'hat2', name: 'Party Hat', type: 'head', price: 50, emoji: '🥳', unlocked: false, equipped: false },
+            { id: 'crown', name: 'King Crown', type: 'head', price: 150, emoji: '👑', unlocked: false, equipped: false },
+            { id: 'glasses1', name: 'Sun Glasses', type: 'face', price: 40, emoji: '🕶️', unlocked: false, equipped: false },
+            { id: 'glasses2', name: 'Nerd Glasses', type: 'face', price: 60, emoji: '🤓', unlocked: false, equipped: false },
+            { id: 'bowtie', name: 'Red Bowtie', type: 'body', price: 50, emoji: '🎀', unlocked: false, equipped: false },
+            { id: 'medal', name: 'Gold Medal', type: 'body', price: 100, emoji: '🥇', unlocked: false, equipped: false },
+            { id: 'scarf', name: 'Winter Scarf', type: 'body', price: 70, emoji: '🧣', unlocked: false, equipped: false }
+        ];
+
         // --- GAME STATE ---
         let currentMode = 0;
         let currentLevel = 0;
@@ -384,20 +459,102 @@
         const ui = {
             menu: document.getElementById('screen-menu'),
             game: document.getElementById('screen-game'),
+            shop: document.getElementById('screen-shop'),
             contentArea: document.getElementById('game-content-area'),
             title: document.getElementById('mode-title'),
             score: document.getElementById('score'),
+            menuScore: document.getElementById('menu-score'),
+            shopScore: document.getElementById('shop-score'),
             controlsDefault: document.getElementById('controls-default'),
             controlsJudge: document.getElementById('controls-judge'),
             controlsTF: document.getElementById('controls-tf')
         };
 
-        // --- CORE FUNCTIONS ---
+        // --- SHOP FUNCTIONS ---
+        function openShop() {
+            ui.menu.classList.add('hidden');
+            ui.shop.classList.remove('hidden');
+            ui.shop.classList.add('bounce-in');
+            renderShop();
+            updateScores();
+            
+            // Garante que o canvas 3D redimensione corretamente no Chromebook
+            setTimeout(() => { if(window.resize3D) window.resize3D(); }, 100);
+        }
 
+        function closeShop() {
+            ui.shop.classList.add('hidden');
+            ui.menu.classList.remove('hidden');
+            ui.menu.classList.add('bounce-in');
+        }
+
+        function renderShop() {
+            const grid = document.getElementById('shop-items-grid');
+            grid.innerHTML = '';
+
+            shopItems.forEach(item => {
+                const btnAction = item.unlocked 
+                    ? `<button onclick="equipItem('${item.id}')" class="mt-2 w-full font-bold py-2 rounded-xl text-white ${item.equipped ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-400'}">${item.equipped ? 'Equipped ✅' : 'Equip 👕'}</button>`
+                    : `<button onclick="buyItem('${item.id}')" class="mt-2 w-full font-bold py-2 rounded-xl text-white ${score >= item.price ? 'bg-green-500 hover:bg-green-400' : 'bg-gray-300 cursor-not-allowed'}">Buy ⭐ ${item.price}</button>`;
+
+                grid.innerHTML += `
+                    <div class="shop-item ${!item.unlocked ? 'locked' : ''} ${item.equipped ? 'equipped' : ''}">
+                        <div class="text-6xl mb-2">${item.emoji}</div>
+                        <div class="title-font text-gray-700 text-lg">${item.name}</div>
+                        ${btnAction}
+                    </div>
+                `;
+            });
+            updateMascotVisuals();
+        }
+
+        function buyItem(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (item && !item.unlocked && score >= item.price) {
+                score -= item.price;
+                item.unlocked = true;
+                equipItem(id); // Equipa automaticamente ao comprar
+                fireConfetti();
+                updateScores();
+                renderShop();
+            }
+        }
+
+        function equipItem(id) {
+            const itemToEquip = shopItems.find(i => i.id === id);
+            if (itemToEquip && itemToEquip.unlocked) {
+                // Desequipa os outros itens do mesmo tipo (cabeça, rosto, corpo)
+                shopItems.forEach(i => {
+                    if (i.type === itemToEquip.type) i.equipped = false;
+                });
+                itemToEquip.equipped = true;
+                renderShop();
+            }
+        }
+
+        function updateMascotVisuals() {
+            if (!window.accessories3D) return;
+            
+            shopItems.forEach(item => {
+                if (window.accessories3D[item.id]) {
+                    // Liga a roupinha direto no modelo 3D se estiver equipada
+                    window.accessories3D[item.id].visible = item.equipped;
+                }
+            });
+        }
+
+        function updateScores() {
+            ui.score.innerText = score;
+            ui.menuScore.innerText = score;
+            ui.shopScore.innerText = score;
+        }
+
+        // --- CORE FUNCTIONS ---
         function returnToMenu() {
             ui.game.classList.add('hidden');
             ui.menu.classList.remove('hidden');
             ui.menu.classList.add('bounce-in');
+            updateScores();
         }
 
         function startGame(mode) {
@@ -600,12 +757,12 @@
         function markCorrect() {
             fireConfetti();
             score += 10;
-            ui.score.innerText = score;
+            updateScores(); // Atualiza a pontuação em todas as telas
             ui.score.parentElement.classList.add('scale-125', 'bg-yellow-300');
             setTimeout(() => {
                 ui.score.parentElement.classList.remove('scale-125', 'bg-yellow-300');
-                nextQuestion(); // Agora SIM avança para TODOS os modos automaticamente
-            }, 1500); // 1.5 segundos de festa com confetes antes de pular a pergunta
+                nextQuestion(); // Agora avança para TODOS os modos automaticamente
+            }, 1500);
         }
 
         function nextQuestion() {
@@ -618,15 +775,189 @@
         }
 
         function fireConfetti() {
-            var duration = 2000;
-            var end = Date.now() + duration;
-
-            (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#8b5cf6', '#ef4444', '#ec4899'] });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
+            // OTIMIZAÇÃO PARA CHROMEBOOK ANTIGO: Disparo único e leve!
+            confetti({ 
+                particleCount: 50, 
+                spread: 70, 
+                origin: { y: 0.6 }, 
+                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'] 
+            });
         }
+
+        // --- CÓDIGO THREE.JS PARA O MASCOTE 3D (Desempenho Otimizado) ---
+        let scene, camera, renderer, robotGroup, headGroup, armL, armR;
+        window.accessories3D = {}; // Guarda as roupinhas 3D
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1.5, 6); // Câmera olhando pro robô
+
+            // Renderizador leve (antialias básico, fundo transparente)
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // Luzes leves para o Chromebook
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
+
+            // Materiais Base do Robô (Lambert = Leve e com Sombra)
+            const matBody = new THREE.MeshLambertMaterial({ color: 0x0097e6 });
+            const matHead = new THREE.MeshLambertMaterial({ color: 0xdcdde1 });
+            const matEye = new THREE.MeshBasicMaterial({ color: 0x273c75 });
+
+            robotGroup = new THREE.Group();
+            scene.add(robotGroup);
+
+            // Corpo
+            const bodyGeo = new THREE.BoxGeometry(1.4, 1.5, 1);
+            const body = new THREE.Mesh(bodyGeo, matBody);
+            robotGroup.add(body);
+
+            // Braços
+            const armGeo = new THREE.BoxGeometry(0.3, 1.2, 0.3);
+            armL = new THREE.Mesh(armGeo, matHead);
+            armL.position.set(-0.9, 0.2, 0);
+            armR = new THREE.Mesh(armGeo, matHead);
+            armR.position.set(0.9, 0.2, 0);
+            robotGroup.add(armL);
+            robotGroup.add(armR);
+
+            // Cabeça (Grupo para as roupinhas acompanharem o movimento)
+            headGroup = new THREE.Group();
+            headGroup.position.y = 1.3;
+            robotGroup.add(headGroup);
+
+            const headGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const head = new THREE.Mesh(headGeo, matHead);
+            headGroup.add(head);
+
+            // Olhos
+            const eyeGeo = new THREE.BoxGeometry(0.2, 0.3, 0.1);
+            const eyeL = new THREE.Mesh(eyeGeo, matEye);
+            eyeL.position.set(-0.3, 0.1, 0.61);
+            const eyeR = new THREE.Mesh(eyeGeo, matEye);
+            eyeR.position.set(0.3, 0.1, 0.61);
+            headGroup.add(eyeL);
+            headGroup.add(eyeR);
+
+            /* --- ACESSÓRIOS 3D ESTRUTURAIS --- */
+            const matGold = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+            const matRed = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            const matBlack = new THREE.MeshBasicMaterial({ color: 0x222222 });
+
+            // 1. Cool Cap (hat1)
+            const capGroup = new THREE.Group();
+            const capTop = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.4, 1.25), matBody);
+            capTop.position.y = 0.8;
+            const capBrim = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.1, 0.8), matBody);
+            capBrim.position.set(0, 0.65, 0.8);
+            capGroup.add(capTop, capBrim);
+            headGroup.add(capGroup); // Colado na cabeça
+            window.accessories3D['hat1'] = capGroup;
+
+            // 2. Party Hat (hat2)
+            const partyHat = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), new THREE.MeshLambertMaterial({color: 0x9b59b6}));
+            partyHat.position.y = 1.2;
+            headGroup.add(partyHat);
+            window.accessories3D['hat2'] = partyHat;
+
+            // 3. King Crown (crown)
+            const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.8, 8), matGold);
+            crown.position.y = 1.0;
+            headGroup.add(crown);
+            window.accessories3D['crown'] = crown;
+
+            // 4. Sun Glasses (glasses1)
+            const glassesGeo = new THREE.BoxGeometry(1.1, 0.4, 0.1);
+            const glasses1 = new THREE.Mesh(glassesGeo, matBlack);
+            glasses1.position.set(0, 0.1, 0.65);
+            headGroup.add(glasses1);
+            window.accessories3D['glasses1'] = glasses1;
+
+            // 5. Nerd Glasses (glasses2)
+            const nerdGeo = new THREE.BoxGeometry(1.2, 0.5, 0.1);
+            const glasses2 = new THREE.Mesh(nerdGeo, new THREE.MeshLambertMaterial({color: 0xffffff}));
+            glasses2.position.set(0, 0.1, 0.65);
+            headGroup.add(glasses2);
+            window.accessories3D['glasses2'] = glasses2;
+
+            // 6. Red Bowtie (bowtie)
+            const bowGroup = new THREE.Group();
+            const bowL = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), matRed);
+            bowL.rotation.z = Math.PI / 2;
+            bowL.position.x = -0.2;
+            const bowR = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), matRed);
+            bowR.rotation.z = -Math.PI / 2;
+            bowR.position.x = 0.2;
+            bowGroup.add(bowL, bowR);
+            bowGroup.position.set(0, 0.5, 0.55);
+            robotGroup.add(bowGroup); // Colado no peito
+            window.accessories3D['bowtie'] = bowGroup;
+
+            // 7. Gold Medal (medal)
+            const medalGroup = new THREE.Group();
+            const medalRibbon = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 0.05), matRed);
+            medalRibbon.position.set(0, 0.3, 0.52);
+            const medalCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), matGold);
+            medalCoin.rotation.x = Math.PI / 2;
+            medalCoin.position.set(0, 0, 0.55);
+            medalGroup.add(medalRibbon, medalCoin);
+            medalGroup.position.set(0, -0.2, 0);
+            robotGroup.add(medalGroup);
+            window.accessories3D['medal'] = medalGroup;
+
+            // 8. Winter Scarf (scarf)
+            const scarfGeo = new THREE.BoxGeometry(1.5, 0.3, 1.2);
+            const scarf = new THREE.Mesh(scarfGeo, matRed);
+            scarf.position.set(0, 0.8, 0);
+            robotGroup.add(scarf);
+            window.accessories3D['scarf'] = scarf;
+
+            // Esconder todas as roupinhas inicialmente
+            Object.values(window.accessories3D).forEach(acc => acc.visible = false);
+
+            // Redimensionamento automático
+            window.resize3D = function() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if(width === 0 || height === 0) return;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            };
+            window.addEventListener('resize', window.resize3D);
+
+            animate();
+        }
+
+        let clock = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            clock += 0.05;
+            
+            // Animação de dança suave e fluida
+            robotGroup.position.y = Math.sin(clock) * 0.1;
+            headGroup.rotation.z = Math.sin(clock * 0.5) * 0.05;
+            headGroup.rotation.y = Math.sin(clock * 0.3) * 0.1; // Cabeça mexendo e roupas acompanhando
+            
+            armL.rotation.x = Math.sin(clock) * 0.5;
+            armR.rotation.x = -Math.sin(clock) * 0.5;
+
+            renderer.render(scene, camera);
+        }
+
+        // Inicializa o Mascote 3D assim que a página terminar de carregar
+        window.onload = function() {
+            init3D();
+        };
+
     </script>
 </body>
 </html>
