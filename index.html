@@ -13,11 +13,13 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             background-size: 400% 400%;
-            animation: gradientBG 10s ease infinite;
+            animation: gradientBG 15s ease infinite;
             overflow-x: hidden;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
         @keyframes gradientBG {
@@ -36,13 +38,12 @@
             transition: all 0.3s ease;
         }
 
-        .bounce-in { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; }
+        .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; }
         @keyframes bounceIn {
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Botões 3D para Game Modes */
         .btn-mode {
             transition: all 0.1s;
             border-bottom-width: 6px;
@@ -54,21 +55,12 @@
             border-bottom-width: 2px;
             margin-top: 4px;
         }
-        .btn-mode:hover::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            animation: shine 0.75s;
-        }
-        @keyframes shine { 100% { left: 200%; } }
 
-        /* Color Coding para ajudar ESL Kids */
-        .grammar-subject { color: #3b82f6; font-weight: 900; } /* Azul para I, He, She */
-        .grammar-verb { color: #8b5cf6; font-weight: 900; } /* Roxo para go, goes */
-        .grammar-place { color: #10b981; font-weight: 900; } /* Verde para lugares */
-        .grammar-transport { color: #f59e0b; font-weight: 900; } /* Laranja para transportes */
+        /* Color Coding for ESL Grammar Patterns */
+        .grammar-subject { color: #3b82f6; font-weight: 900; }
+        .grammar-verb { color: #8b5cf6; font-weight: 900; }
+        .grammar-place { color: #10b981; font-weight: 900; }
+        .grammar-transport { color: #f59e0b; font-weight: 900; }
 
         .word-block {
             display: inline-block;
@@ -94,21 +86,22 @@
             100% { transform: scale(1); }
         }
 
-        /* --- STYLES DA LOJINHA E DO MASCOTE 3D --- */
         .shop-container {
-            background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
         }
         
         #canvas-container {
             width: 100%;
-            height: 350px;
+            height: 450px;
             border-radius: 20px;
             overflow: hidden;
-            background: radial-gradient(circle, #f5f6fa 0%, #dcdde1 100%);
-            border: 4px solid #7f8fa6;
+            background: radial-gradient(circle at center, #ffffff 0%, #d4e4f7 100%);
+            border: 6px solid #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
         }
 
-        /* Estilos dos Itens da Loja */
+        /* Rarity System Styling */
         .shop-item {
             background: white;
             border: 4px solid #e2e8f0;
@@ -116,113 +109,234 @@
             padding: 15px;
             text-align: center;
             transition: all 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .shop-item:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        .shop-item.locked { filter: grayscale(0.5); opacity: 0.8; }
-        .shop-item.equipped { border-color: #3b82f6; background: #eff6ff; }
+        .shop-item.locked { filter: brightness(0.9); opacity: 0.9; }
+        .shop-item.equipped { background: #f8fafc; border-color: #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.5); }
+        
+        .rarity-badge {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 12px;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+
+        .tier-common { border-color: #94a3b8; }
+        .tier-common .rarity-badge { background: #94a3b8; }
+        .tier-uncommon { border-color: #22c55e; }
+        .tier-uncommon .rarity-badge { background: #22c55e; }
+        .tier-rare { border-color: #3b82f6; }
+        .tier-rare .rarity-badge { background: #3b82f6; }
+        .tier-epic { border-color: #a855f7; }
+        .tier-epic .rarity-badge { background: #a855f7; }
+        .tier-legendary { border-color: #f59e0b; background-image: linear-gradient(to bottom right, #fff, #fef3c7); }
+        .tier-legendary .rarity-badge { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #78350f; }
+
+        .type-icon { font-size: 1.5rem; position: absolute; top: 10px; right: 10px; opacity: 0.5; }
+        
+        #shop-items-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        #shop-items-container::-webkit-scrollbar { width: 10px; }
+        #shop-items-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.5); border-radius: 10px; }
+        #shop-items-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+
+        /* Inspector UI Overlay */
+        #inspector-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: none;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+        #inspector-overlay.active { display: flex; flex-direction: column; }
+        .inspector-panel { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #475569; margin-bottom: 20px;}
     </style>
 </head>
 
 <body class="flex flex-col items-center justify-center p-4">
 
-    <!-- MENU PRINCIPAL -->
-    <div id="screen-menu" class="game-container max-w-4xl w-full p-10 text-center bounce-in z-10">
+    <!-- Developer Mode Toggle & Inspector -->
+    <div class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 items-start">
+        <div id="dev-panel" class="hidden bg-gray-900 text-white p-4 rounded-xl shadow-2xl text-xs font-mono border border-gray-700 w-64">
+            <div class="font-bold text-yellow-400 mb-2 border-b border-gray-700 pb-1 flex items-center gap-2">
+                <span>🛠️</span> DEV MODE ACTIVE
+            </div>
+            <div class="mb-1 flex justify-between items-center gap-4">
+                <span>Add 100 Stars</span>
+                <kbd class="bg-gray-700 text-green-400 px-2 py-1 rounded shadow">M</kbd>
+            </div>
+            <div class="mb-3 flex justify-between items-center gap-4 border-b border-gray-700 pb-3">
+                <span>Remove 100 Stars</span>
+                <kbd class="bg-gray-700 text-red-400 px-2 py-1 rounded shadow">N</kbd>
+            </div>
+            <button onclick="toggleInspector()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-center transition">
+                🔍 Visual Fitting Inspector
+            </button>
+        </div>
+        <button onclick="toggleDevMode()" class="bg-gray-800 text-gray-400 hover:text-white px-4 py-2 rounded-full text-xs font-bold border border-gray-600 shadow-md transition-all hover:scale-105 active:scale-95">
+            DEV MODE
+        </button>
+    </div>
+
+    <!-- Inspector Fullscreen Overlay -->
+    <div id="inspector-overlay">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-3xl font-bold text-blue-400">🔍 Accessory Fitting Inspector</h2>
+            <button onclick="toggleInspector()" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Close Inspector</button>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+            <!-- 3D Viewport Re-parent Target -->
+            <div id="inspector-viewport-target" class="col-span-2 bg-gray-800 rounded-xl overflow-hidden relative border-4 border-gray-600 min-h-[400px]">
+                <!-- Canvas moves here during inspection -->
+            </div>
+            
+            <!-- Inspector Controls -->
+            <div class="inspector-panel flex flex-col gap-4 overflow-y-auto">
+                <div>
+                    <label class="block text-sm font-bold text-gray-400 mb-1">Select Accessory to Inspect:</label>
+                    <select id="inspector-item-select" onchange="inspectItem(this.value)" class="w-full bg-gray-700 text-white rounded p-2 border border-gray-600">
+                        <option value="">-- Choose Item --</option>
+                        <!-- Injected via JS -->
+                    </select>
+                </div>
+                
+                <div class="bg-gray-900 p-3 rounded border border-gray-700">
+                    <h3 class="font-bold text-yellow-400 mb-2 border-b border-gray-700 pb-1">Item Data</h3>
+                    <p class="text-xs text-gray-300">ID: <span id="insp-id" class="text-white font-mono">None</span></p>
+                    <p class="text-xs text-gray-300">Type/Anchor: <span id="insp-type" class="text-white font-mono">None</span></p>
+                    <p class="text-xs text-gray-300">Parent: <span id="insp-parent" class="text-white font-mono">None</span></p>
+                </div>
+
+                <button onclick="runFitValidation()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded shadow-lg transition">
+                    ✔️ Run Fit Validation
+                </button>
+                
+                <div id="validation-results" class="text-xs font-mono bg-black p-3 rounded h-32 overflow-y-auto text-green-400 border border-gray-700">
+                    Waiting for validation...
+                </div>
+
+                <div class="flex gap-2 mt-auto">
+                    <button onclick="toggleMascotVisibility()" class="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs font-bold py-2 rounded">Toggle Mascot</button>
+                    <button onclick="resetInspectorView()" class="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs font-bold py-2 rounded">Reset Camera</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Menu -->
+    <div id="screen-menu" class="game-container max-w-5xl w-full p-10 text-center bounce-in z-10">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-6xl text-purple-600 title-font drop-shadow-md">Transport Quest!</h1>
             
-            <!-- Botão da Lojinha -->
             <button onclick="openShop()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 border-b-8 border-yellow-600 px-6 py-4 rounded-3xl text-3xl title-font shadow-lg flex items-center gap-3 transition-transform hover:scale-105 active:translate-y-2 active:border-b-0">
-                🛒 Shop <span class="bg-white px-3 py-1 rounded-xl">⭐ <span id="menu-score">0</span></span>
+                🛒 Shop <span class="bg-white px-3 py-1 rounded-xl shadow-inner">⭐ <span id="menu-score">0</span></span>
             </button>
         </div>
         
         <p class="text-2xl text-gray-500 mb-8 font-bold">Choose a Game Mode to play with the class!</p>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Mode 1 -->
             <button onclick="startGame(1)" class="btn-mode bg-blue-400 border-blue-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-blue-300">
                 <span class="text-5xl mb-2">🪄</span>
                 <span class="text-2xl title-font">1. Missing Magic</span>
-                <span class="text-sm font-bold mt-2">Fill in the blanks!</span>
             </button>
-            <!-- Mode 2 -->
             <button onclick="startGame(2)" class="btn-mode bg-green-400 border-green-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-green-300">
                 <span class="text-5xl mb-2">🕵️</span>
                 <span class="text-2xl title-font">2. Detective</span>
-                <span class="text-sm font-bold mt-2">True or False?</span>
             </button>
-            <!-- Mode 3 -->
             <button onclick="startGame(3)" class="btn-mode bg-yellow-400 border-yellow-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-yellow-300">
                 <span class="text-5xl mb-2">🧱</span>
                 <span class="text-2xl title-font">3. Word Builder</span>
-                <span class="text-sm font-bold mt-2">Unscramble sentences</span>
             </button>
-            <!-- Mode 4 -->
             <button onclick="startGame(4)" class="btn-mode bg-pink-400 border-pink-600 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-pink-300">
                 <span class="text-5xl mb-2">❓</span>
                 <span class="text-2xl title-font">4. Mystery Person</span>
-                <span class="text-sm font-bold mt-2">Listen and choose</span>
             </button>
-            <!-- Mode 5 -->
             <button onclick="startGame(5)" class="btn-mode bg-red-500 border-red-700 text-white p-6 rounded-3xl flex flex-col items-center justify-center hover:bg-red-400 lg:col-span-2">
                 <span class="text-5xl mb-2">🤖</span>
-                <span class="text-2xl title-font">5. The Negative Machine</span>
-                <span class="text-sm font-bold mt-2">Change YES to NO!</span>
+                <span class="text-2xl title-font">5. Negative Machine</span>
             </button>
         </div>
     </div>
 
-    <!-- TELA DA LOJINHA (SHOP) -->
-    <div id="screen-shop" class="game-container shop-container max-w-5xl w-full p-8 hidden flex-col z-10">
-        <div class="flex justify-between items-center mb-6 border-b-4 border-white pb-4">
-            <button onclick="closeShop()" class="text-gray-600 hover:text-red-500 font-bold text-2xl flex items-center gap-2 bg-white px-6 py-2 rounded-full shadow-sm">
+    <!-- Shop Screen -->
+    <div id="screen-shop" class="game-container shop-container max-w-6xl w-full p-8 hidden flex-col z-10">
+        <div class="flex justify-between items-center mb-4 border-b-4 border-white/50 pb-4">
+            <button onclick="closeShop()" class="text-gray-700 hover:text-red-500 font-bold text-2xl flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-md transition hover:scale-105">
                 ◀ Back to Game
             </button>
-            <div class="text-5xl title-font text-purple-600 drop-shadow-sm">Mascot Shop 🛍️</div>
-            <div class="bg-yellow-400 text-yellow-900 border-b-4 border-yellow-600 px-6 py-2 rounded-full text-3xl title-font shadow-md flex items-center gap-2">
+            <div class="text-5xl title-font text-white drop-shadow-md">Class Mascot Customizer 🎨</div>
+            <div class="bg-yellow-400 text-yellow-900 border-b-4 border-yellow-600 px-6 py-3 rounded-full text-3xl title-font shadow-lg flex items-center gap-2">
                 ⭐ <span id="shop-score">0</span>
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8 items-center justify-center min-h-[400px]">
-            
-            <!-- O Mascote 3D (Renderizado pelo Three.js) -->
-            <div class="w-full md:w-1/3 flex flex-col items-center justify-center bg-white/50 rounded-3xl p-6 border-4 border-white shadow-inner">
-                <div id="canvas-container"></div>
-                <p class="mt-4 text-xl font-bold text-gray-600 title-font bg-white px-6 py-2 rounded-full shadow">Class Mascot 🤖</p>
+        <div class="flex flex-col lg:flex-row gap-6 items-stretch justify-center">
+            <!-- 3D Mascot Preview Area -->
+            <div class="w-full lg:w-5/12 flex flex-col items-center bg-white/40 backdrop-blur-sm rounded-3xl p-4 border-4 border-white shadow-xl relative">
+                <div class="absolute top-6 left-6 z-10 flex gap-2 flex-col">
+                    <button onclick="resetMascot()" class="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-400 font-bold text-sm" title="Remove all items">🔄 Reset Look</button>
+                </div>
+                
+                <!-- The Canvas Container (Moves to Inspector when needed) -->
+                <div id="canvas-wrapper" class="w-full h-full relative">
+                    <div id="canvas-container"></div>
+                </div>
+
+                <p class="mt-4 text-2xl font-bold text-gray-700 title-font bg-white px-8 py-3 rounded-full shadow-md">Meet Bytes! 🤖</p>
+                <p class="text-sm font-bold text-gray-600 mt-2 text-center">Swipe or drag to rotate camera</p>
             </div>
 
-            <!-- Grade de Roupas/Itens -->
-            <div class="w-full md:w-2/3 grid grid-cols-2 lg:grid-cols-3 gap-4" id="shop-items-grid">
-                <!-- Itens injetados via JS -->
+            <!-- Shop Item Grid -->
+            <div class="w-full lg:w-7/12 bg-white/60 backdrop-blur-sm rounded-3xl border-4 border-white shadow-xl" id="shop-items-container">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5" id="shop-items-grid">
+                    <!-- Dynamic injection -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- TELA DO JOGO (Dinâmica) -->
+    <!-- Gameplay Screen -->
     <div id="screen-game" class="game-container max-w-5xl w-full p-8 text-center hidden flex-col z-10">
-        
-        <!-- Header do Jogo -->
         <div class="flex justify-between items-center mb-6 border-b-4 border-gray-100 pb-4">
-            <button onclick="returnToMenu()" class="text-gray-400 hover:text-red-500 font-bold text-xl flex items-center gap-2">
+            <button onclick="returnToMenu()" class="text-gray-400 hover:text-red-500 font-bold text-xl flex items-center gap-2 transition hover:scale-105">
                 ◀ Menu
             </button>
-            <div class="text-3xl title-font text-purple-500" id="mode-title">Mode Name</div>
+            <div class="text-4xl title-font text-blue-600 drop-shadow-sm" id="mode-title">Mode Name</div>
             <div class="bg-yellow-400 text-yellow-900 border-b-4 border-yellow-600 px-6 py-2 rounded-full text-3xl title-font shadow-md flex items-center gap-2">
                 ⭐ <span id="score">0</span>
             </div>
         </div>
 
-        <!-- Área Dinâmica de Conteúdo onde os modos serão renderizados -->
-        <div id="game-content-area" class="min-h-[350px] flex flex-col justify-center items-center bg-gray-50 p-8 rounded-3xl shadow-inner border-4 border-dashed border-gray-300 relative overflow-hidden mb-6">
-            <!-- Conteúdo injetado via JS -->
+        <div id="game-content-area" class="min-h-[350px] flex flex-col justify-center items-center bg-blue-50/50 p-8 rounded-3xl shadow-inner border-4 border-dashed border-blue-200 relative overflow-hidden mb-6 transition-opacity duration-300">
+            <!-- Dynamic injection -->
         </div>
 
         <!-- Teacher Controls -->
-        <div class="bg-white p-6 rounded-2xl border-4 border-gray-200 shadow-sm">
-            <p class="text-gray-400 text-sm font-bold uppercase mb-4 tracking-widest">🕹️ Teacher Controls</p>
+        <div class="bg-white p-6 rounded-2xl border-4 border-gray-200 shadow-sm relative">
+            <p class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs font-bold uppercase px-4 py-1 rounded-full tracking-widest shadow-md">🕹️ Teacher Controls</p>
             
-            <div id="controls-default" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="controls-default" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <button onclick="handleReveal()" id="btn-reveal" class="btn-mode bg-blue-500 border-blue-700 text-white text-2xl py-4 rounded-xl title-font hover:bg-blue-400">
                     👀 Reveal Answer
                 </button>
@@ -231,8 +345,7 @@
                 </button>
             </div>
 
-            <!-- Botões que aparecem após revelar -->
-            <div id="controls-judge" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="controls-judge" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <button onclick="markCorrect()" class="btn-mode bg-green-500 border-green-700 text-white text-3xl py-4 rounded-xl title-font hover:bg-green-400">
                     🎉 CORRECT! (+10)
                 </button>
@@ -241,8 +354,7 @@
                 </button>
             </div>
             
-            <!-- Controles Específicos para Mode 2 (True/False) e Mode 4 -->
-            <div id="controls-tf" class="hidden grid grid-cols-2 gap-4">
+            <div id="controls-tf" class="hidden grid grid-cols-2 gap-4 mt-2">
                 <button onclick="checkTF(true)" class="btn-mode bg-green-500 border-green-700 text-white text-3xl py-6 rounded-xl title-font hover:bg-green-400">
                     ✅ TRUE
                 </button>
@@ -254,208 +366,145 @@
     </div>
 
     <script>
-        // --- DATA BANKS FOR EACH MODE ---
+        // DEV MODE VARIABLES
+        let isDevMode = false;
 
-        // Mode 1: Missing Magic (27 levels)
+        function toggleDevMode() {
+            isDevMode = !isDevMode;
+            const panel = document.getElementById('dev-panel');
+            if (isDevMode) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+                if(isInspectorActive) toggleInspector();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (!isDevMode) return;
+            const tag = e.target.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
+
+            const key = e.key.toLowerCase();
+            let changed = false;
+
+            if (key === 'm') {
+                score += 100;
+                changed = true;
+            } else if (key === 'n') {
+                score = Math.max(0, score - 100);
+                changed = true;
+            }
+
+            if (changed) {
+                updateScores();
+                saveData();
+                if (!ui.shop.classList.contains('hidden') || isInspectorActive) {
+                    renderShop();
+                }
+            }
+        });
+
         const dataMode1 = [
-            // Round 1 (Alunos 1 a 9)
             { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>train</span>.", answer: "goes", emoji: "👦 🚆" },
             { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>school</span> by #BLANK#.", answer: "helicopter", emoji: "🚁 ❌" },
-            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>motorcycle</span>.", answer: "doesn't go", emoji: "👧 🏍️ ❌" },
-            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>go</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "car", emoji: "🏔️ 🚗" },
-            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the park</span> by #BLANK#.", answer: "airplane", emoji: "✈️ ❌" },
-            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the movie theater</span> by <span class='grammar-transport'>bus</span>.", answer: "goes", emoji: "👧 🚌 🍿" },
-            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the mall</span> by #BLANK#.", answer: "bike", emoji: "🚲 ❌" },
-            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>boat</span>.", answer: "goes", emoji: "👦 ⛵ 🏖️" },
-            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>school</span> by #BLANK#.", answer: "car", emoji: "🚗 ❌ 🏫" },
-            
-            // Round 2 (Alunos 1 a 9)
-            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>the zoo</span> by <span class='grammar-transport'>bus</span>.", answer: "go", emoji: "🦁 🚌" },
-            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "train", emoji: "👦 🚆 🏔️" },
-            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the park</span> by <span class='grammar-transport'>bike</span>.", answer: "doesn't go", emoji: "👧 🚲 ❌" },
-            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the beach</span> by #BLANK#.", answer: "motorcycle", emoji: "🏍️ ❌ 🏖️" },
-            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the movie theater</span> by <span class='grammar-transport'>car</span>.", answer: "goes", emoji: "👦 🚗 🍿" },
-            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mall</span> by #BLANK#.", answer: "helicopter", emoji: "👧 🚁 🛍️" },
-            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>school</span> by <span class='grammar-transport'>train</span>.", answer: "don't go", emoji: "🏫 🚆 ❌" },
-            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the zoo</span> by #BLANK#.", answer: "bus", emoji: "👦 🚌 ❌" },
-            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>boat</span>.", answer: "goes", emoji: "👧 ⛵ 🏖️" },
-
-            // Round 3 (Alunos 1 a 9)
-            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>go</span> to <span class='grammar-place'>the movie theater</span> by #BLANK#.", answer: "bike", emoji: "🍿 🚲" },
-            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>school</span> by <span class='grammar-transport'>airplane</span>.", answer: "doesn't go", emoji: "👦 ✈️ ❌" },
-            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "car", emoji: "👧 🚗 🏔️" },
-            { text: "<span class='grammar-subject'>I</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>bus</span>.", answer: "go", emoji: "🛍️ 🚌" },
-            { text: "<span class='grammar-subject'>He</span> <span class='grammar-verb'>goes</span> to <span class='grammar-place'>the park</span> by #BLANK#.", answer: "motorcycle", emoji: "👦 🏍️ 🌳" },
-            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the zoo</span> by <span class='grammar-transport'>train</span>.", answer: "doesn't go", emoji: "👧 🚆 ❌" },
-            { text: "<span class='grammar-subject'>I</span> <span class='grammar-verb'>don't go</span> to <span class='grammar-place'>the beach</span> by #BLANK#.", answer: "boat", emoji: "🏖️ ⛵ ❌" },
-            { text: "<span class='grammar-subject'>He</span> #BLANK# to <span class='grammar-place'>the mall</span> by <span class='grammar-transport'>helicopter</span>.", answer: "goes", emoji: "👦 🚁 🛍️" },
-            { text: "<span class='grammar-subject'>She</span> <span class='grammar-verb'>doesn't go</span> to <span class='grammar-place'>the mountains</span> by #BLANK#.", answer: "bike", emoji: "👧 🚲 ❌" }
+            { text: "<span class='grammar-subject'>She</span> #BLANK# to <span class='grammar-place'>the beach</span> by <span class='grammar-transport'>motorcycle</span>.", answer: "doesn't go", emoji: "👧 🏍️ ❌" }
         ];
-
-        // Mode 2: True or False (27 levels)
         const dataMode2 = [
-            // Round 1
             { emoji: "👦 🚌 🏫", text: "He goes to school by bus.", isTrue: true },
             { emoji: "👧 🚁 🏖️", text: "She goes to the beach by car.", isTrue: false },
-            { emoji: "👦 ❌ 🚆", text: "He doesn't go by train.", isTrue: true },
-            { emoji: "👩 ✈️ 🏔️", text: "She doesn't go to the mountains by airplane.", isTrue: false },
-            { emoji: "🚗 🛍️ ✅", text: "I go to the mall by car.", isTrue: true },
-            { emoji: "🚲 🌳 ❌", text: "I go to the park by bike.", isTrue: false },
-            { emoji: "👦 ⛵ 🏖️", text: "He goes to the beach by boat.", isTrue: true },
-            { emoji: "👧 🏍️ 🍿", text: "She goes to the movie theater by train.", isTrue: false },
-            { emoji: "🚁 🏫 ❌", text: "I don't go to school by helicopter.", isTrue: true },
-            
-            // Round 2
-            { emoji: "👦 🚲 🌳", text: "He goes to the park by bike.", isTrue: true },
-            { emoji: "👧 ❌ 🚌", text: "She goes to school by bus.", isTrue: false },
-            { emoji: "✈️ 🏔️ ✅", text: "I go to the mountains by airplane.", isTrue: true },
-            { emoji: "👦 🚗 🛍️", text: "He doesn't go to the mall by car.", isTrue: false },
-            { emoji: "👧 🚆 🦁", text: "She goes to the zoo by train.", isTrue: true },
-            { emoji: "⛵ 🏖️ ❌", text: "I don't go to the beach by boat.", isTrue: true },
-            { emoji: "👦 🚁 🍿", text: "He goes to the movie theater by helicopter.", isTrue: true },
-            { emoji: "👧 ❌ 🏍️", text: "She goes to the park by motorcycle.", isTrue: false },
-            { emoji: "🚌 🏫 ✅", text: "I go to school by bus.", isTrue: true },
-
-            // Round 3
-            { emoji: "👦 ❌ ✈️", text: "He doesn't go by airplane.", isTrue: true },
-            { emoji: "👧 🚗 🏔️", text: "She goes to the beach by car.", isTrue: false },
-            { emoji: "🚆 🛍️ ✅", text: "I go to the mall by train.", isTrue: true },
-            { emoji: "👦 🚲 🏫", text: "He doesn't go to school by bike.", isTrue: false },
-            { emoji: "👧 ⛵ 🏖️", text: "She goes to the beach by boat.", isTrue: true },
-            { emoji: "🏍️ 🦁 ❌", text: "I don't go to the zoo by motorcycle.", isTrue: true },
-            { emoji: "👦 🚌 🌳", text: "He goes to the park by bus.", isTrue: true },
-            { emoji: "👧 ❌ 🚁", text: "She goes to the mall by helicopter.", isTrue: false },
-            { emoji: "🚗 🍿 ✅", text: "I go to the movie theater by car.", isTrue: true }
+            { emoji: "👦 ❌ 🚆", text: "He doesn't go by train.", isTrue: true }
         ];
-
-        // Mode 3: Word Builder (27 levels)
         const dataMode3 = [
-            // Round 1
             { words: ["She", "goes", "to", "school", "by", "bus."], emoji: "👧 🏫 🚌" },
-            { words: ["He", "doesn't", "go", "by", "train."], emoji: "👦 ❌ 🚆" },
-            { words: ["I", "go", "to", "the mall", "by", "car."], emoji: "🛍️ 🚗 ✅" },
-            { words: ["I", "don't", "go", "by", "helicopter."], emoji: "🚁 ❌" },
-            { words: ["He", "goes", "to", "the park", "by", "bike."], emoji: "👦 🌳 🚲" },
-            { words: ["She", "doesn't", "go", "to", "the beach."], emoji: "👧 🏖️ ❌" },
-            { words: ["I", "go", "to", "the zoo", "by", "bus."], emoji: "🦁 🚌 ✅" },
-            { words: ["He", "doesn't", "go", "by", "motorcycle."], emoji: "👦 🏍️ ❌" },
-            { words: ["She", "goes", "to", "the mountains", "by", "train."], emoji: "👧 🏔️ 🚆" },
-
-            // Round 2
-            { words: ["I", "don't", "go", "to", "school", "by", "car."], emoji: "🏫 🚗 ❌" },
-            { words: ["He", "goes", "to", "the mall", "by", "helicopter."], emoji: "👦 🛍️ 🚁" },
-            { words: ["She", "doesn't", "go", "by", "boat."], emoji: "👧 ⛵ ❌" },
-            { words: ["I", "go", "to", "the beach", "by", "airplane."], emoji: "🏖️ ✈️ ✅" },
-            { words: ["He", "doesn't", "go", "to", "the zoo."], emoji: "👦 🦁 ❌" },
-            { words: ["She", "goes", "to", "the park", "by", "car."], emoji: "👧 🌳 🚗" },
-            { words: ["I", "don't", "go", "by", "bike."], emoji: "🚲 ❌" },
-            { words: ["He", "goes", "to", "the movie theater", "by", "bus."], emoji: "👦 🍿 🚌" },
-            { words: ["She", "doesn't", "go", "by", "train."], emoji: "👧 🚆 ❌" },
-
-            // Round 3
-            { words: ["I", "go", "to", "the mountains", "by", "car."], emoji: "🏔️ 🚗 ✅" },
-            { words: ["He", "doesn't", "go", "to", "school", "by", "bus."], emoji: "👦 🏫 🚌 ❌" },
-            { words: ["She", "goes", "to", "the mall", "by", "bike."], emoji: "👧 🛍️ 🚲" },
-            { words: ["I", "don't", "go", "to", "the beach", "by", "helicopter."], emoji: "🏖️ 🚁 ❌" },
-            { words: ["He", "goes", "by", "motorcycle."], emoji: "👦 🏍️ ✅" },
-            { words: ["She", "doesn't", "go", "to", "the park."], emoji: "👧 🌳 ❌" },
-            { words: ["I", "go", "to", "school", "by", "train."], emoji: "🏫 🚆 ✅" },
-            { words: ["He", "doesn't", "go", "by", "airplane."], emoji: "👦 ✈️ ❌" },
-            { words: ["She", "goes", "to", "the zoo", "by", "boat."], emoji: "👧 🦁 ⛵" }
+            { words: ["He", "doesn't", "go", "by", "train."], emoji: "👦 ❌ 🚆" }
         ];
-
-        // Mode 4: Mystery Person (A or B) (27 levels)
         const dataMode4 = [
-            // Round 1
-            { clue: "I don't go to school by bus. I go by car.", optA: { emoji: "👧 🚌", label: "Mary" }, optB: { emoji: "👦 🚗", label: "Peter" }, correct: 'B' },
-            { clue: "She goes to the beach by helicopter.", optA: { emoji: "👩 🚁", label: "Sally" }, optB: { emoji: "👩 ✈️", label: "Jane" }, correct: 'A' },
-            { clue: "He doesn't go to the mall by bike. He goes by motorcycle.", optA: { emoji: "👦 🚲", label: "Tom" }, optB: { emoji: "👦 🏍️", label: "Bob" }, correct: 'B' },
-            { clue: "I go to the park by bus. I don't go by train.", optA: { emoji: "🧑 🚌", label: "Alex" }, optB: { emoji: "🧑 🚆", label: "Sam" }, correct: 'A' },
-            { clue: "She doesn't go to the mountains by car. She goes by train.", optA: { emoji: "👧 🚆", label: "Lily" }, optB: { emoji: "👧 🚗", label: "Mia" }, correct: 'A' },
-            { clue: "He goes to the zoo by bike.", optA: { emoji: "👦 🚲", label: "Leo" }, optB: { emoji: "👦 🚗", label: "Max" }, correct: 'A' },
-            { clue: "I don't go to the movie theater by motorcycle. I go by bus.", optA: { emoji: "🧑 🏍️", label: "Chris" }, optB: { emoji: "🧑 🚌", label: "Pat" }, correct: 'B' },
-            { clue: "She goes to school by boat.", optA: { emoji: "👧 ⛵", label: "Zoe" }, optB: { emoji: "👧 🚌", label: "Amy" }, correct: 'A' },
-            { clue: "He doesn't go to the beach by helicopter. He goes by airplane.", optA: { emoji: "👦 ✈️", label: "Dan" }, optB: { emoji: "👦 🚁", label: "Tim" }, correct: 'A' },
-            
-            // Round 2
-            { clue: "I go to the mall by car. I don't go by bus.", optA: { emoji: "🧑 🚌", label: "Kelly" }, optB: { emoji: "🧑 🚗", label: "Jordan" }, correct: 'B' },
-            { clue: "She doesn't go to the park by bike. She goes by car.", optA: { emoji: "👩 🚗", label: "Nina" }, optB: { emoji: "👩 🚲", label: "Lara" }, correct: 'A' },
-            { clue: "He goes to the mountains by helicopter.", optA: { emoji: "👦 ✈️", label: "Paul" }, optB: { emoji: "👦 🚁", label: "Mark" }, correct: 'B' },
-            { clue: "I don't go to school by train. I go by bike.", optA: { emoji: "🧑 🚲", label: "Ryan" }, optB: { emoji: "🧑 🚆", label: "Sean" }, correct: 'A' },
-            { clue: "She goes to the zoo by bus.", optA: { emoji: "👧 🚌", label: "Emma" }, optB: { emoji: "👧 🚗", label: "Chloe" }, correct: 'A' },
-            { clue: "He doesn't go to the movie theater by car. He goes by train.", optA: { emoji: "👦 🚗", label: "Noah" }, optB: { emoji: "👦 🚆", label: "Liam" }, correct: 'B' },
-            { clue: "I go to the beach by motorcycle. I don't go by boat.", optA: { emoji: "🧑 🏍️", label: "Jay" }, optB: { emoji: "🧑 ⛵", label: "Ray" }, correct: 'A' },
-            { clue: "She doesn't go to the mall by airplane. She goes by helicopter.", optA: { emoji: "👩 🚁", label: "Sara" }, optB: { emoji: "👩 ✈️", label: "Tara" }, correct: 'A' },
-            { clue: "He goes to the park by bus.", optA: { emoji: "👦 🚗", label: "Luke" }, optB: { emoji: "👦 🚌", label: "Jack" }, correct: 'B' },
-
-            // Round 3
-            { clue: "I don't go to the zoo by bike. I go by car.", optA: { emoji: "🧑 🚗", label: "Drew" }, optB: { emoji: "🧑 🚲", label: "Finn" }, correct: 'A' },
-            { clue: "She goes to the mountains by train.", optA: { emoji: "👧 🚆", label: "Ruby" }, optB: { emoji: "👧 🚌", label: "Jade" }, correct: 'A' },
-            { clue: "He doesn't go to school by motorcycle. He goes by bike.", optA: { emoji: "👦 🏍️", label: "Eli" }, optB: { emoji: "👦 🚲", label: "Ian" }, correct: 'B' },
-            { clue: "I go to the mall by helicopter. I don't go by airplane.", optA: { emoji: "🧑 ✈️", label: "Gabe" }, optB: { emoji: "🧑 🚁", label: "Owen" }, correct: 'B' },
-            { clue: "She doesn't go to the movie theater by train. She goes by bus.", optA: { emoji: "👩 🚌", label: "Fay" }, optB: { emoji: "👩 🚆", label: "Kay" }, correct: 'A' },
-            { clue: "He goes to the beach by boat.", optA: { emoji: "👦 ⛵", label: "Cody" }, optB: { emoji: "👦 🚗", label: "Zack" }, correct: 'A' },
-            { clue: "I don't go to the park by car. I go by motorcycle.", optA: { emoji: "🧑 🏍️", label: "Toby" }, optB: { emoji: "🧑 🚗", label: "Seth" }, correct: 'A' },
-            { clue: "She goes to the zoo by airplane.", optA: { emoji: "👧 🚁", label: "Eva" }, optB: { emoji: "👧 ✈️", label: "Ava" }, correct: 'B' },
-            { clue: "He doesn't go to the mountains by bus. He goes by car.", optA: { emoji: "👦 🚗", label: "Rex" }, optB: { emoji: "👦 🚌", label: "Jed" }, correct: 'A' }
+            { clue: "I don't go to school by bus. I go by car.", optA: { emoji: "👧 🚌", label: "Mary" }, optB: { emoji: "👦 🚗", label: "Peter" }, correct: 'B' }
         ];
-
-        // Mode 5: Negative Machine (27 levels)
         const dataMode5 = [
-            // Round 1
             { pos: "I go to school by bus.", neg: "I don't go to school by bus." },
-            { pos: "He goes to the mall by car.", neg: "He doesn't go to the mall by car." },
-            { pos: "She goes by train.", neg: "She doesn't go by train." },
-            { pos: "I go to the beach by motorcycle.", neg: "I don't go to the beach by motorcycle." },
-            { pos: "He goes to the mountains by helicopter.", neg: "He doesn't go to the mountains by helicopter." },
-            { pos: "She goes to the park by bike.", neg: "She doesn't go to the park by bike." },
-            { pos: "I go to the zoo by train.", neg: "I don't go to the zoo by train." },
-            { pos: "He goes to the movie theater by bus.", neg: "He doesn't go to the movie theater by bus." },
-            { pos: "She goes to the beach by boat.", neg: "She doesn't go to the beach by boat." },
-            
-            // Round 2
-            { pos: "I go to the mall by airplane.", neg: "I don't go to the mall by airplane." },
-            { pos: "He goes to school by bike.", neg: "He doesn't go to school by bike." },
-            { pos: "She goes to the mountains by car.", neg: "She doesn't go to the mountains by car." },
-            { pos: "I go to the park by motorcycle.", neg: "I don't go to the park by motorcycle." },
-            { pos: "He goes to the zoo by helicopter.", neg: "He doesn't go to the zoo by helicopter." },
-            { pos: "She goes to the mall by bus.", neg: "She doesn't go to the mall by bus." },
-            { pos: "I go to the beach by train.", neg: "I don't go to the beach by train." },
-            { pos: "He goes to the movie theater by car.", neg: "He doesn't go to the movie theater by car." },
-            { pos: "She goes to school by motorcycle.", neg: "She doesn't go to school by motorcycle." },
-
-            // Round 3
-            { pos: "I go to the mountains by bike.", neg: "I don't go to the mountains by bike." },
-            { pos: "He goes to the park by boat.", neg: "He doesn't go to the park by boat." },
-            { pos: "She goes to the zoo by train.", neg: "She doesn't go to the zoo by train." },
-            { pos: "I go to the movie theater by helicopter.", neg: "I don't go to the movie theater by helicopter." },
-            { pos: "He goes to the beach by airplane.", neg: "He doesn't go to the beach by airplane." },
-            { pos: "She goes to the mall by motorcycle.", neg: "She doesn't go to the mall by motorcycle." },
-            { pos: "I go to school by boat.", neg: "I don't go to school by boat." },
-            { pos: "He goes to the mountains by bus.", neg: "He doesn't go to the mountains by bus." },
-            { pos: "She goes to the park by car.", neg: "She doesn't go to the park by car." }
+            { pos: "He goes to the mall by car.", neg: "He doesn't go to the mall by car." }
         ];
 
-        // --- SHOP & MASCOT STATE ---
-        let shopItems = [
-            { id: 'hat1', name: 'Cool Cap', type: 'head', price: 30, emoji: '🧢', unlocked: false, equipped: false },
-            { id: 'hat2', name: 'Party Hat', type: 'head', price: 50, emoji: '🥳', unlocked: false, equipped: false },
-            { id: 'crown', name: 'King Crown', type: 'head', price: 150, emoji: '👑', unlocked: false, equipped: false },
-            { id: 'glasses1', name: 'Sun Glasses', type: 'face', price: 40, emoji: '🕶️', unlocked: false, equipped: false },
-            { id: 'glasses2', name: 'Nerd Glasses', type: 'face', price: 60, emoji: '🤓', unlocked: false, equipped: false },
-            { id: 'bowtie', name: 'Red Bowtie', type: 'body', price: 50, emoji: '🎀', unlocked: false, equipped: false },
-            { id: 'medal', name: 'Gold Medal', type: 'body', price: 100, emoji: '🥇', unlocked: false, equipped: false },
-            { id: 'scarf', name: 'Winter Scarf', type: 'body', price: 70, emoji: '🧣', unlocked: false, equipped: false }
+        const initialShopItems = [
+            // COMMON (Gray)
+            { id: 'coolCap', name: 'Cool Cap', type: 'head', rarity: 'common', price: 30, emoji: '🧢' },
+            { id: 'nerdGlasses', name: 'Nerd Glasses', type: 'face', rarity: 'common', price: 40, emoji: '🤓' },
+            { id: 'spikyHair', name: 'Spiky Hair', type: 'head', rarity: 'common', price: 40, emoji: '⚡' },
+            { id: 'basicTee', name: 'Student Tee', type: 'body', rarity: 'common', price: 50, emoji: '👕' },
+
+            // UNCOMMON (Green)
+            { id: 'headphones', name: 'Gamer Phones', type: 'head', rarity: 'uncommon', price: 80, emoji: '🎧' },
+            { id: 'scarf', name: 'Winter Scarf', type: 'neck', rarity: 'uncommon', price: 90, emoji: '🧣' },
+            { id: '3dGlasses', name: '3D Glasses', type: 'face', rarity: 'uncommon', price: 100, emoji: '🕶️' },
+            { id: 'beanie', name: 'Propeller Hat', type: 'head', rarity: 'uncommon', price: 120, emoji: '🚁' },
+
+            // RARE (Blue)
+            { id: 'eyePatch', name: 'Pirate Patch', type: 'face', rarity: 'rare', price: 200, emoji: '🏴‍☠️' },
+            { id: 'trenchCoat', name: 'Detective Coat', type: 'body', rarity: 'rare', price: 250, emoji: '🧥' },
+            { id: 'explorerHat', name: 'Explorer Hat', type: 'head', rarity: 'rare', price: 250, emoji: '🤠' },
+            { id: 'ninjaMask', name: 'Ninja Mask', type: 'face', rarity: 'rare', price: 300, emoji: '🥷' },
+
+            // EPIC (Purple)
+            { id: 'wizardHat', name: 'Wizard Hat', type: 'head', rarity: 'epic', price: 500, emoji: '🧙' },
+            { id: 'wizardRobe', name: 'Magic Robe', type: 'body', rarity: 'epic', price: 600, emoji: '🔮' },
+            { id: 'heroCape', name: 'Hero Cape', type: 'back', rarity: 'epic', price: 650, emoji: '🦸' },
+            { id: 'astronaut', name: 'Astro Helmet', type: 'head', rarity: 'epic', price: 700, emoji: '🧑‍🚀' },
+
+            // LEGENDARY (Gold)
+            { id: 'kingCrown', name: 'Royal Crown', type: 'head', rarity: 'legendary', price: 1000, emoji: '👑' },
+            { id: 'goldenMedal', name: 'Champion Medal', type: 'neck', rarity: 'legendary', price: 1200, emoji: '🥇' },
+            { id: 'dragonWings', name: 'Dragon Wings', type: 'back', rarity: 'legendary', price: 1500, emoji: '🐉' }
         ];
 
-        // --- GAME STATE ---
+        let score = 0;
+        let shopItems = [];
         let currentMode = 0;
         let currentLevel = 0;
-        let score = 0;
         let currentData = [];
-        let builderSelectedWords = []; // Para o modo 3
+        let builderSelectedWords = [];
+        let isTransitioning = false;
+        const STORAGE_KEY = 'transportQuestData_v4'; // Incremented key to ensure clean state
 
-        // --- DOM ELEMENTS ---
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    score = parsed.score || 0;
+                    shopItems = initialShopItems.map(baseItem => {
+                        const savedItem = parsed.items ? parsed.items.find(i => i.id === baseItem.id) : null;
+                        return {
+                            ...baseItem,
+                            unlocked: savedItem ? savedItem.unlocked : false,
+                            equipped: savedItem ? savedItem.equipped : false
+                        };
+                    });
+                } else {
+                    score = 0;
+                    shopItems = initialShopItems.map(item => ({ ...item, unlocked: false, equipped: false }));
+                }
+            } catch(e) {
+                console.error("Error loading save data", e);
+                score = 0;
+                shopItems = initialShopItems.map(item => ({ ...item, unlocked: false, equipped: false }));
+            }
+            updateScores();
+        }
+
+        function saveData() {
+            try {
+                const dataToSave = {
+                    score: score,
+                    items: shopItems.map(i => ({ id: i.id, unlocked: i.unlocked, equipped: i.equipped }))
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            } catch(e) {
+                console.error("Error saving data", e);
+            }
+        }
+
         const ui = {
             menu: document.getElementById('screen-menu'),
             game: document.getElementById('screen-game'),
@@ -470,15 +519,12 @@
             controlsTF: document.getElementById('controls-tf')
         };
 
-        // --- SHOP FUNCTIONS ---
         function openShop() {
             ui.menu.classList.add('hidden');
             ui.shop.classList.remove('hidden');
             ui.shop.classList.add('bounce-in');
             renderShop();
             updateScores();
-            
-            // Garante que o canvas 3D redimensione corretamente no Chromebook
             setTimeout(() => { if(window.resize3D) window.resize3D(); }, 100);
         }
 
@@ -490,22 +536,36 @@
 
         function renderShop() {
             const grid = document.getElementById('shop-items-grid');
+            if(!grid) return;
             grid.innerHTML = '';
 
             shopItems.forEach(item => {
-                const btnAction = item.unlocked 
-                    ? `<button onclick="equipItem('${item.id}')" class="mt-2 w-full font-bold py-2 rounded-xl text-white ${item.equipped ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-400'}">${item.equipped ? 'Equipped ✅' : 'Equip 👕'}</button>`
-                    : `<button onclick="buyItem('${item.id}')" class="mt-2 w-full font-bold py-2 rounded-xl text-white ${score >= item.price ? 'bg-green-500 hover:bg-green-400' : 'bg-gray-300 cursor-not-allowed'}">Buy ⭐ ${item.price}</button>`;
+                const isLocked = !item.unlocked;
+                
+                let btnHtml = '';
+                if (isLocked) {
+                    const canAfford = score >= item.price;
+                    btnHtml = `<button onclick="buyItem('${item.id}')" class="mt-4 w-full font-bold py-2 rounded-xl text-white transition ${canAfford ? 'bg-green-500 hover:bg-green-400 hover:scale-105 shadow-md' : 'bg-gray-300 cursor-not-allowed'}">Buy ⭐ ${item.price}</button>`;
+                } else if (item.equipped) {
+                    btnHtml = `<button onclick="unequipItem('${item.id}')" class="mt-4 w-full font-bold py-2 rounded-xl text-white bg-gray-500 hover:bg-gray-600 transition shadow-inner">Unequip ❌</button>`;
+                } else {
+                    btnHtml = `<button onclick="equipItem('${item.id}')" class="mt-4 w-full font-bold py-2 rounded-xl text-white bg-blue-500 hover:bg-blue-400 transition hover:scale-105 shadow-md">Equip 👕</button>`;
+                }
+
+                const typeIcons = { head: '🧢', face: '👓', neck: '🧣', body: '👔', back: '🎒' };
 
                 grid.innerHTML += `
-                    <div class="shop-item ${!item.unlocked ? 'locked' : ''} ${item.equipped ? 'equipped' : ''}">
-                        <div class="text-6xl mb-2">${item.emoji}</div>
-                        <div class="title-font text-gray-700 text-lg">${item.name}</div>
-                        ${btnAction}
+                    <div class="shop-item tier-${item.rarity} ${isLocked ? 'locked' : ''} ${item.equipped ? 'equipped' : ''}">
+                        <div class="rarity-badge">${item.rarity}</div>
+                        <div class="type-icon" title="Slot: ${item.type}">${typeIcons[item.type] || '✨'}</div>
+                        <div class="text-7xl mt-4 mb-2 drop-shadow-md">${item.emoji}</div>
+                        <div class="title-font text-gray-800 text-xl leading-tight">${item.name}</div>
+                        ${btnHtml}
                     </div>
                 `;
             });
             updateMascotVisuals();
+            populateInspectorDropdown();
         }
 
         function buyItem(id) {
@@ -513,32 +573,56 @@
             if (item && !item.unlocked && score >= item.price) {
                 score -= item.price;
                 item.unlocked = true;
-                equipItem(id); // Equipa automaticamente ao comprar
+                saveData();
+                equipItem(id);
                 fireConfetti();
                 updateScores();
-                renderShop();
             }
         }
 
         function equipItem(id) {
             const itemToEquip = shopItems.find(i => i.id === id);
             if (itemToEquip && itemToEquip.unlocked) {
-                // Desequipa os outros itens do mesmo tipo (cabeça, rosto, corpo)
                 shopItems.forEach(i => {
                     if (i.type === itemToEquip.type) i.equipped = false;
                 });
                 itemToEquip.equipped = true;
+                saveData();
                 renderShop();
             }
         }
 
+        function unequipItem(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (item && item.equipped) {
+                item.equipped = false;
+                saveData();
+                renderShop();
+            }
+        }
+
+        function resetMascot() {
+            shopItems.forEach(i => i.equipped = false);
+            saveData();
+            renderShop();
+        }
+
         function updateMascotVisuals() {
             if (!window.accessories3D) return;
+            Object.values(window.accessories3D).forEach(acc => { if(acc) acc.visible = false; });
             
+            // If we are actively inspecting one item, ONLY show that item.
+            if(isInspectorActive && inspectedItemId) {
+                if(window.accessories3D[inspectedItemId]) {
+                    window.accessories3D[inspectedItemId].visible = true;
+                }
+                return;
+            }
+
+            // Normal equipment logic
             shopItems.forEach(item => {
-                if (window.accessories3D[item.id]) {
-                    // Liga a roupinha direto no modelo 3D se estiver equipada
-                    window.accessories3D[item.id].visible = item.equipped;
+                if (item.equipped && window.accessories3D[item.id]) {
+                    window.accessories3D[item.id].visible = true;
                 }
             });
         }
@@ -549,7 +633,6 @@
             ui.shopScore.innerText = score;
         }
 
-        // --- CORE FUNCTIONS ---
         function returnToMenu() {
             ui.game.classList.add('hidden');
             ui.menu.classList.remove('hidden');
@@ -560,176 +643,155 @@
         function startGame(mode) {
             currentMode = mode;
             currentLevel = 0;
-            currentData = eval(`dataMode${mode}`); // Carrega o banco de dados correspondente
+            currentData = eval(`dataMode${mode}`);
+            isTransitioning = false;
             
-            // Setup UI
             ui.menu.classList.add('hidden');
             ui.game.classList.remove('hidden');
             ui.game.classList.add('bounce-in');
             
-            const titles = ["", "1. Missing Magic 🪄", "2. Detective 🕵️", "3. Word Builder 🧱", "4. Mystery Person ❓", "5. The Negative Machine 🤖"];
+            const titles = ["", "1. Missing Magic 🪄", "2. Detective 🕵️", "3. Word Builder 🧱", "4. Mystery Person ❓", "5. Negative Machine 🤖"];
             ui.title.innerText = titles[mode];
 
             loadLevel();
         }
 
         function loadLevel() {
-            if (currentLevel >= currentData.length) {
-                currentLevel = 0; // Loop infinito para a aula não parar
-            }
-
+            if (currentLevel >= currentData.length) currentLevel = 0;
             const data = currentData[currentLevel];
-            ui.contentArea.innerHTML = ""; // Limpa a tela
+            ui.contentArea.innerHTML = ""; 
             
-            // Reset Controls
             ui.controlsDefault.classList.remove('hidden');
             ui.controlsJudge.classList.add('hidden');
             ui.controlsTF.classList.add('hidden');
 
-            // --- RENDER MODE 1: Missing Magic ---
             if (currentMode === 1) {
                 ui.contentArea.innerHTML = `
-                    <div class="text-8xl mb-6 pulse-text">${data.emoji}</div>
-                    <h2 class="text-5xl leading-relaxed text-gray-700 title-font bg-white p-8 rounded-3xl border-4 border-dashed border-blue-300 w-full">
-                        ${data.text.replace('#BLANK#', '<span id="blank-space" class="inline-block min-w-[200px] border-b-8 border-dashed border-red-500 text-red-500 pb-2 mx-4 bg-red-50 rounded-t-xl">????</span>')}
+                    <div class="text-8xl mb-6 pulse-text drop-shadow-lg">${data.emoji}</div>
+                    <h2 class="text-5xl leading-relaxed text-gray-700 title-font bg-white p-8 rounded-3xl border-4 border-dashed border-blue-300 w-full shadow-md">
+                        ${data.text.replace('#BLANK#', '<span id="blank-space" class="inline-block min-w-[200px] border-b-8 border-dashed border-red-500 text-red-500 pb-2 mx-4 bg-red-50 rounded-t-xl transition-all">????</span>')}
                     </h2>
                 `;
-            }
-
-            // --- RENDER MODE 2: True or False ---
-            else if (currentMode === 2) {
+            } else if (currentMode === 2) {
                 ui.controlsDefault.classList.add('hidden');
-                ui.controlsTF.classList.remove('hidden'); // Usa botões TF
-
+                ui.controlsTF.classList.remove('hidden');
                 ui.contentArea.innerHTML = `
-                    <div class="text-9xl mb-8">${data.emoji}</div>
-                    <div class="bg-blue-100 p-6 rounded-3xl border-4 border-blue-300 w-full relative">
-                        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-2 rounded-full font-bold">Alien says:</div>
+                    <div class="text-9xl mb-8 drop-shadow-xl">${data.emoji}</div>
+                    <div class="bg-white p-8 rounded-3xl border-4 border-blue-300 w-full relative shadow-lg">
+                        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-8 py-2 rounded-full font-bold shadow-md">Teacher says:</div>
                         <h2 class="text-6xl text-gray-800 title-font mt-4">"${data.text}"</h2>
                     </div>
-                    <div id="tf-feedback" class="text-5xl title-font mt-6 h-12 hidden"></div>
+                    <div id="tf-feedback" class="text-5xl title-font mt-8 h-12 hidden"></div>
                 `;
-            }
-
-            // --- RENDER MODE 3: Word Builder ---
-            else if (currentMode === 3) {
-                ui.controlsDefault.classList.add('hidden'); // Esconde controles padrão
+            } else if (currentMode === 3) {
+                ui.controlsDefault.classList.add('hidden');
                 builderSelectedWords = [];
-                
-                // Embaralhar palavras
                 let shuffled = [...data.words].sort(() => Math.random() - 0.5);
-                
-                let blocksHTML = shuffled.map((word, index) => 
-                    `<div class="word-block title-font text-blue-600" onclick="selectWord(this)">${word}</div>`
+                let blocksHTML = shuffled.map((word) => 
+                    `<div class="word-block title-font text-blue-700 shadow-sm" onclick="selectWord(this)">${word}</div>`
                 ).join('');
 
                 ui.contentArea.innerHTML = `
-                    <div class="text-7xl mb-6">${data.emoji}</div>
-                    
-                    <!-- Caixa de Resposta (Vazia no começo) -->
-                    <div id="builder-answer" class="min-h-[100px] w-full bg-white border-4 border-dashed border-gray-400 rounded-2xl mb-8 p-4 flex flex-wrap justify-center items-center gap-2">
-                        <span class="text-gray-300 text-2xl font-bold uppercase">Click blocks to build sentence</span>
+                    <div class="text-7xl mb-6 drop-shadow-lg">${data.emoji}</div>
+                    <div id="builder-answer" class="min-h-[120px] w-full bg-white border-4 border-dashed border-gray-400 rounded-3xl mb-8 p-6 flex flex-wrap justify-center items-center gap-3 shadow-inner">
+                        <span class="text-gray-300 text-2xl font-bold uppercase tracking-widest">Click blocks to build</span>
                     </div>
-                    
-                    <!-- Blocos de Palavras -->
-                    <div class="flex flex-wrap justify-center">
-                        ${blocksHTML}
-                    </div>
-
-                    <div class="mt-8 flex gap-4">
-                        <button onclick="checkBuilder()" class="btn-mode bg-green-500 text-white text-2xl py-3 px-8 rounded-xl title-font border-green-700">Check Answer ✅</button>
-                        <button onclick="loadLevel()" class="btn-mode bg-orange-400 text-white text-2xl py-3 px-8 rounded-xl title-font border-orange-600">Reset 🔄</button>
+                    <div class="flex flex-wrap justify-center gap-2">${blocksHTML}</div>
+                    <div class="mt-8 flex gap-6">
+                        <button onclick="checkBuilder()" class="btn-mode bg-green-500 text-white text-2xl py-4 px-10 rounded-2xl title-font border-green-700 shadow-md">Check Answer ✅</button>
+                        <button onclick="loadLevel()" class="btn-mode bg-orange-400 text-white text-2xl py-4 px-10 rounded-2xl title-font border-orange-600 shadow-md">Reset 🔄</button>
                     </div>
                 `;
-            }
-
-            // --- RENDER MODE 4: Mystery Person ---
-            else if (currentMode === 4) {
+            } else if (currentMode === 4) {
                 ui.controlsDefault.classList.add('hidden');
-                
                 ui.contentArea.innerHTML = `
-                    <div class="bg-purple-100 p-6 rounded-3xl border-4 border-purple-300 w-full mb-8 shadow-md">
-                        <h2 class="text-4xl text-gray-800 title-font leading-relaxed">"${data.clue}"</h2>
+                    <div class="bg-white p-8 rounded-3xl border-4 border-purple-300 w-full mb-8 shadow-lg relative">
+                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-6 py-1 rounded-full font-bold shadow-sm text-sm tracking-wide">CLUE</div>
+                        <h2 class="text-4xl text-gray-800 title-font leading-relaxed mt-2">"${data.clue}"</h2>
                     </div>
-                    <div class="flex gap-8 w-full justify-center">
-                        <button onclick="checkMystery('A')" class="btn-mode flex-1 bg-white border-4 border-gray-300 hover:border-blue-500 rounded-3xl p-8 flex flex-col items-center">
-                            <span class="text-8xl mb-4">${data.optA.emoji}</span>
+                    <div class="flex flex-col md:flex-row gap-8 w-full justify-center">
+                        <button onclick="checkMystery('A')" class="btn-mode flex-1 bg-white border-4 border-gray-200 hover:border-blue-400 rounded-3xl p-8 flex flex-col items-center transition shadow-md">
+                            <span class="text-8xl mb-4 drop-shadow-md">${data.optA.emoji}</span>
                             <span class="text-3xl title-font text-blue-600">${data.optA.label}</span>
                         </button>
-                        <button onclick="checkMystery('B')" class="btn-mode flex-1 bg-white border-4 border-gray-300 hover:border-blue-500 rounded-3xl p-8 flex flex-col items-center">
-                            <span class="text-8xl mb-4">${data.optB.emoji}</span>
+                        <button onclick="checkMystery('B')" class="btn-mode flex-1 bg-white border-4 border-gray-200 hover:border-blue-400 rounded-3xl p-8 flex flex-col items-center transition shadow-md">
+                            <span class="text-8xl mb-4 drop-shadow-md">${data.optB.emoji}</span>
                             <span class="text-3xl title-font text-blue-600">${data.optB.label}</span>
                         </button>
                     </div>
                 `;
-            }
-
-            // --- RENDER MODE 5: Negative Machine ---
-            else if (currentMode === 5) {
+            } else if (currentMode === 5) {
                 ui.contentArea.innerHTML = `
-                    <div class="text-8xl mb-4 pulse-text">⚙️🤖</div>
-                    <h2 class="text-5xl text-gray-700 title-font bg-white p-6 rounded-2xl border-4 border-gray-300 mb-6 w-full">
+                    <div class="text-8xl mb-4 pulse-text drop-shadow-lg">⚙️🤖</div>
+                    <h2 class="text-5xl text-gray-700 title-font bg-white p-8 rounded-3xl border-4 border-gray-300 mb-6 w-full shadow-md">
                         ${data.pos}
                     </h2>
-                    <div class="text-4xl font-black text-red-500 mb-4 tracking-widest">⬇️ SHOUT THE NEGATIVE! ⬇️</div>
-                    <div id="neg-answer" class="text-5xl text-white title-font bg-red-500 p-6 rounded-2xl w-full hidden border-4 border-red-700">
+                    <div class="text-3xl font-black text-red-500 mb-4 tracking-widest bg-red-100 px-6 py-2 rounded-full border-2 border-red-200">⬇️ SHOUT THE NEGATIVE! ⬇️</div>
+                    <div id="neg-answer" class="text-5xl text-white title-font bg-gradient-to-r from-red-500 to-pink-500 p-8 rounded-3xl w-full hidden border-4 border-white shadow-xl">
                         ${data.neg}
                     </div>
                 `;
             }
         }
 
-
-        // Ações do Professor (Modo 1 e 5)
         function handleReveal() {
+            if(isTransitioning || !currentData || currentData.length === 0) return;
+            let safeLevel = currentLevel >= currentData.length ? 0 : currentLevel;
+
             if (currentMode === 1) {
                 const blank = document.getElementById('blank-space');
-                blank.innerHTML = currentData[currentLevel].answer.toUpperCase();
-                blank.className = "inline-block px-6 py-2 bg-green-100 text-green-600 border-b-8 border-green-500 rounded-xl bounce-in";
-            } 
-            else if (currentMode === 5) {
-                document.getElementById('neg-answer').classList.remove('hidden');
-                document.getElementById('neg-answer').classList.add('bounce-in');
+                if (blank) {
+                    blank.innerHTML = currentData[safeLevel].answer.toUpperCase();
+                    blank.className = "inline-block px-8 py-2 bg-green-100 text-green-700 border-b-8 border-green-500 rounded-2xl bounce-in shadow-inner";
+                }
+            } else if (currentMode === 5) {
+                const negAnswer = document.getElementById('neg-answer');
+                if (negAnswer) {
+                    negAnswer.classList.remove('hidden');
+                    negAnswer.classList.add('bounce-in');
+                }
             }
-            
             ui.controlsDefault.classList.add('hidden');
             ui.controlsJudge.classList.remove('hidden');
         }
 
-        // Ações Modo 2 (True/False)
         function checkTF(guess) {
-            const isCorrect = guess === currentData[currentLevel].isTrue;
+            if(isTransitioning) return;
+            let safeLevel = currentLevel >= currentData.length ? 0 : currentLevel;
+            const isCorrect = guess === currentData[safeLevel].isTrue;
             const fb = document.getElementById('tf-feedback');
             fb.classList.remove('hidden');
             
             if (isCorrect) {
                 fb.innerHTML = "🎉 CORRECT!";
-                fb.className = "text-6xl title-font mt-6 text-green-500 bounce-in";
+                fb.className = "text-6xl title-font mt-8 text-green-500 bounce-in drop-shadow-sm";
                 markCorrect();
             } else {
                 fb.innerHTML = "❌ OOPS! WRONG!";
-                fb.className = "text-6xl title-font mt-6 text-red-500 bounce-in";
-                setTimeout(nextQuestion, 2000);
+                fb.className = "text-6xl title-font mt-8 text-red-500 bounce-in drop-shadow-sm";
+                setTimeout(nextQuestion, 1500);
             }
         }
 
-        // Ações Modo 3 (Word Builder)
         function selectWord(element) {
+            if(isTransitioning) return;
             const word = element.innerText;
             element.classList.add('selected');
             builderSelectedWords.push(word);
             
             const answerBox = document.getElementById('builder-answer');
-            if (builderSelectedWords.length === 1) answerBox.innerHTML = ""; // limpa placeholder
+            if (builderSelectedWords.length === 1) answerBox.innerHTML = ""; 
             
             const newBlock = document.createElement('div');
-            newBlock.className = "word-block title-font text-white bg-blue-500 border-blue-700 bounce-in";
+            newBlock.className = "word-block title-font text-white bg-blue-500 border-blue-700 bounce-in shadow-md";
             newBlock.innerText = word;
             answerBox.appendChild(newBlock);
         }
 
         function checkBuilder() {
-            const data = currentData[currentLevel];
+            if(isTransitioning) return;
+            let safeLevel = currentLevel >= currentData.length ? 0 : currentLevel;
+            const data = currentData[safeLevel];
             const currentSentence = builderSelectedWords.join(" ");
             const targetSentence = data.words.join(" ");
             
@@ -740,221 +802,744 @@
                 answerBox.classList.add('bg-red-100', 'border-red-500');
                 setTimeout(() => {
                     answerBox.classList.remove('bg-red-100', 'border-red-500');
-                    loadLevel(); // reset
+                    loadLevel();
                 }, 1500);
             }
         }
 
-        // Ações Modo 4 (Mystery Person)
         function checkMystery(guess) {
-            if (guess === currentData[currentLevel].correct) {
+            if(isTransitioning) return;
+            let safeLevel = currentLevel >= currentData.length ? 0 : currentLevel;
+            if (guess === currentData[safeLevel].correct) {
                 markCorrect();
             } else {
-                nextQuestion(); // Pula sem ponto
+                nextQuestion(); 
             }
         }
 
         function markCorrect() {
+            if(isTransitioning) return;
+            isTransitioning = true;
             fireConfetti();
             score += 10;
-            updateScores(); // Atualiza a pontuação em todas as telas
+            saveData();
+            updateScores(); 
             ui.score.parentElement.classList.add('scale-125', 'bg-yellow-300');
+            
             setTimeout(() => {
                 ui.score.parentElement.classList.remove('scale-125', 'bg-yellow-300');
-                nextQuestion(); // Agora avança para TODOS os modos automaticamente
+                nextQuestion();
             }, 1500);
         }
 
         function nextQuestion() {
+            isTransitioning = true;
             currentLevel++;
+            if (currentData && currentLevel >= currentData.length) currentLevel = 0;
+
             ui.contentArea.style.opacity = 0;
+            if(ui.controlsDefault) ui.controlsDefault.style.pointerEvents = 'none';
+            if(ui.controlsJudge) ui.controlsJudge.style.pointerEvents = 'none';
+            if(ui.controlsTF) ui.controlsTF.style.pointerEvents = 'none';
+
             setTimeout(() => {
                 loadLevel();
                 ui.contentArea.style.opacity = 1;
+                
+                if(ui.controlsDefault) ui.controlsDefault.style.pointerEvents = 'auto';
+                if(ui.controlsJudge) ui.controlsJudge.style.pointerEvents = 'auto';
+                if(ui.controlsTF) ui.controlsTF.style.pointerEvents = 'auto';
+                
+                isTransitioning = false;
             }, 300);
         }
 
         function fireConfetti() {
-            // OTIMIZAÇÃO PARA CHROMEBOOK ANTIGO: Disparo único e leve!
+            // Optimized for Chromebooks - single clean burst
             confetti({ 
-                particleCount: 50, 
+                particleCount: 60, 
                 spread: 70, 
                 origin: { y: 0.6 }, 
-                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'] 
+                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#fcd34d'],
+                disableForReducedMotion: true
             });
         }
 
-        // --- CÓDIGO THREE.JS PARA O MASCOTE 3D (Desempenho Otimizado) ---
-        let scene, camera, renderer, robotGroup, headGroup, armL, armR;
-        window.accessories3D = {}; // Guarda as roupinhas 3D
+        let scene, camera, renderer, clock;
+        let robotGroup, bodyGroup, headGroup;
+        // Strictly defined anatomical anchors
+        let headCenterAnchor, topHeadAnchor, faceAnchor, neckAnchor, bodyAnchor, backAnchor;
+        let armL, armR, legL, legR;
+        window.accessories3D = {}; 
 
         function init3D() {
             const container = document.getElementById('canvas-container');
+            if(renderer) return; 
             
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 1.5, 6); // Câmera olhando pro robô
+            scene.fog = new THREE.FogExp2(0xd4e4f7, 0.05);
 
-            // Renderizador leve (antialias básico, fundo transparente)
+            camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1.8, 8); 
+
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
 
-            // Luzes leves para o Chromebook
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            dirLight.position.set(5, 10, 5);
-            scene.add(dirLight);
 
-            // Materiais Base do Robô (Lambert = Leve e com Sombra)
-            const matBody = new THREE.MeshLambertMaterial({ color: 0x0097e6 });
-            const matHead = new THREE.MeshLambertMaterial({ color: 0xdcdde1 });
-            const matEye = new THREE.MeshBasicMaterial({ color: 0x273c75 });
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+            hemiLight.position.set(0, 10, 0);
+            scene.add(hemiLight);
 
-            robotGroup = new THREE.Group();
-            scene.add(robotGroup);
+            const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+            mainLight.position.set(5, 10, 7);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 1024;
+            mainLight.shadow.mapSize.height = 1024;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 25;
+            mainLight.shadow.camera.left = -5;
+            mainLight.shadow.camera.right = 5;
+            mainLight.shadow.camera.top = 5;
+            mainLight.shadow.camera.bottom = -5;
+            mainLight.shadow.bias = -0.001;
+            scene.add(mainLight);
 
-            // Corpo
-            const bodyGeo = new THREE.BoxGeometry(1.4, 1.5, 1);
-            const body = new THREE.Mesh(bodyGeo, matBody);
-            robotGroup.add(body);
+            const fillLight = new THREE.DirectionalLight(0x90b0d0, 0.4);
+            fillLight.position.set(-5, 3, -5);
+            scene.add(fillLight);
 
-            // Braços
-            const armGeo = new THREE.BoxGeometry(0.3, 1.2, 0.3);
-            armL = new THREE.Mesh(armGeo, matHead);
-            armL.position.set(-0.9, 0.2, 0);
-            armR = new THREE.Mesh(armGeo, matHead);
-            armR.position.set(0.9, 0.2, 0);
-            robotGroup.add(armL);
-            robotGroup.add(armR);
+            // Ground shadow plane
+            const floorGeo = new THREE.PlaneGeometry(20, 20);
+            const floorMat = new THREE.ShadowMaterial({ opacity: 0.2 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -1.2;
+            floor.receiveShadow = true;
+            scene.add(floor);
 
-            // Cabeça (Grupo para as roupinhas acompanharem o movimento)
-            headGroup = new THREE.Group();
-            headGroup.position.y = 1.3;
-            robotGroup.add(headGroup);
+            buildMascot();
+            buildAccessories();
 
-            const headGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
-            const head = new THREE.Mesh(headGeo, matHead);
-            headGroup.add(head);
-
-            // Olhos
-            const eyeGeo = new THREE.BoxGeometry(0.2, 0.3, 0.1);
-            const eyeL = new THREE.Mesh(eyeGeo, matEye);
-            eyeL.position.set(-0.3, 0.1, 0.61);
-            const eyeR = new THREE.Mesh(eyeGeo, matEye);
-            eyeR.position.set(0.3, 0.1, 0.61);
-            headGroup.add(eyeL);
-            headGroup.add(eyeR);
-
-            /* --- ACESSÓRIOS 3D ESTRUTURAIS --- */
-            const matGold = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
-            const matRed = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
-            const matBlack = new THREE.MeshBasicMaterial({ color: 0x222222 });
-
-            // 1. Cool Cap (hat1)
-            const capGroup = new THREE.Group();
-            const capTop = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.4, 1.25), matBody);
-            capTop.position.y = 0.8;
-            const capBrim = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.1, 0.8), matBody);
-            capBrim.position.set(0, 0.65, 0.8);
-            capGroup.add(capTop, capBrim);
-            headGroup.add(capGroup); // Colado na cabeça
-            window.accessories3D['hat1'] = capGroup;
-
-            // 2. Party Hat (hat2)
-            const partyHat = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), new THREE.MeshLambertMaterial({color: 0x9b59b6}));
-            partyHat.position.y = 1.2;
-            headGroup.add(partyHat);
-            window.accessories3D['hat2'] = partyHat;
-
-            // 3. King Crown (crown)
-            const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.8, 8), matGold);
-            crown.position.y = 1.0;
-            headGroup.add(crown);
-            window.accessories3D['crown'] = crown;
-
-            // 4. Sun Glasses (glasses1)
-            const glassesGeo = new THREE.BoxGeometry(1.1, 0.4, 0.1);
-            const glasses1 = new THREE.Mesh(glassesGeo, matBlack);
-            glasses1.position.set(0, 0.1, 0.65);
-            headGroup.add(glasses1);
-            window.accessories3D['glasses1'] = glasses1;
-
-            // 5. Nerd Glasses (glasses2)
-            const nerdGeo = new THREE.BoxGeometry(1.2, 0.5, 0.1);
-            const glasses2 = new THREE.Mesh(nerdGeo, new THREE.MeshLambertMaterial({color: 0xffffff}));
-            glasses2.position.set(0, 0.1, 0.65);
-            headGroup.add(glasses2);
-            window.accessories3D['glasses2'] = glasses2;
-
-            // 6. Red Bowtie (bowtie)
-            const bowGroup = new THREE.Group();
-            const bowL = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), matRed);
-            bowL.rotation.z = Math.PI / 2;
-            bowL.position.x = -0.2;
-            const bowR = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), matRed);
-            bowR.rotation.z = -Math.PI / 2;
-            bowR.position.x = 0.2;
-            bowGroup.add(bowL, bowR);
-            bowGroup.position.set(0, 0.5, 0.55);
-            robotGroup.add(bowGroup); // Colado no peito
-            window.accessories3D['bowtie'] = bowGroup;
-
-            // 7. Gold Medal (medal)
-            const medalGroup = new THREE.Group();
-            const medalRibbon = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 0.05), matRed);
-            medalRibbon.position.set(0, 0.3, 0.52);
-            const medalCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), matGold);
-            medalCoin.rotation.x = Math.PI / 2;
-            medalCoin.position.set(0, 0, 0.55);
-            medalGroup.add(medalRibbon, medalCoin);
-            medalGroup.position.set(0, -0.2, 0);
-            robotGroup.add(medalGroup);
-            window.accessories3D['medal'] = medalGroup;
-
-            // 8. Winter Scarf (scarf)
-            const scarfGeo = new THREE.BoxGeometry(1.5, 0.3, 1.2);
-            const scarf = new THREE.Mesh(scarfGeo, matRed);
-            scarf.position.set(0, 0.8, 0);
-            robotGroup.add(scarf);
-            window.accessories3D['scarf'] = scarf;
-
-            // Esconder todas as roupinhas inicialmente
-            Object.values(window.accessories3D).forEach(acc => acc.visible = false);
-
-            // Redimensionamento automático
             window.resize3D = function() {
-                const width = container.clientWidth;
-                const height = container.clientHeight;
-                if(width === 0 || height === 0) return;
+                const activeContainer = document.getElementById('canvas-container').parentElement;
+                if(!activeContainer || activeContainer.clientWidth === 0) return;
+                const width = activeContainer.clientWidth;
+                const height = activeContainer.clientHeight;
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
                 renderer.setSize(width, height);
             };
             window.addEventListener('resize', window.resize3D);
 
+            setupInteraction(container);
+
+            clock = new THREE.Clock();
             animate();
+            updateMascotVisuals();
         }
 
-        let clock = 0;
+        function setupInteraction(element) {
+            let isDragging = false, prevX = 0;
+            const onDown = e => { isDragging = true; prevX = e.clientX || e.touches[0].clientX; };
+            const onUp = () => { isDragging = false; };
+            const onMove = e => {
+                if(isDragging && robotGroup) {
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    if(clientX !== undefined) {
+                        const delta = clientX - prevX;
+                        robotGroup.rotation.y += delta * 0.01;
+                        prevX = clientX;
+                    }
+                }
+            };
+            element.addEventListener('mousedown', onDown);
+            element.addEventListener('touchstart', onDown, {passive: true});
+            window.addEventListener('mouseup', onUp);
+            window.addEventListener('touchend', onUp);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, {passive: true});
+        }
+
+        function buildMascot() {
+            robotGroup = new THREE.Group();
+            scene.add(robotGroup);
+
+            // Materials - High quality stylized look
+            const matPlastic = new THREE.MeshStandardMaterial({ color: 0x8ec5fc, roughness: 0.3, metalness: 0.1 }); 
+            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+            const matScreen = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.6 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 });
+
+            // 1. Root Body
+            bodyGroup = new THREE.Group();
+            bodyGroup.position.y = -0.1;
+            robotGroup.add(bodyGroup);
+
+            // Torso (Stylized pill shape)
+            const torsoGroup = new THREE.Group();
+            const torsoMid = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.8, 32), matWhite);
+            const torsoTop = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 16, 0, Math.PI*2, 0, Math.PI/2), matWhite);
+            torsoTop.position.y = 0.4;
+            const torsoBot = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 16, 0, Math.PI*2, Math.PI/2, Math.PI/2), matWhite);
+            torsoBot.position.y = -0.4;
+            torsoMid.castShadow = torsoTop.castShadow = torsoBot.castShadow = true;
+            torsoGroup.add(torsoMid, torsoTop, torsoBot);
+            bodyGroup.add(torsoGroup);
+
+            const belly = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 32), matPlastic);
+            belly.rotation.x = Math.PI/2;
+            belly.position.set(0, -0.1, 0.58);
+            bodyGroup.add(belly);
+
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.3, 16), matDark);
+            neck.position.y = 0.8;
+            bodyGroup.add(neck);
+
+            // -- ATTACHMENT ARCHITECTURE (BODY) --
+            bodyAnchor = new THREE.Group(); // Center of mass for shirts/coats
+            bodyGroup.add(bodyAnchor);
+
+            neckAnchor = new THREE.Group();
+            neckAnchor.position.set(0, 0.75, 0); // Base of neck for scarfs/medals
+            bodyGroup.add(neckAnchor);
+
+            backAnchor = new THREE.Group();
+            backAnchor.position.set(0, 0.2, -0.6); // For wings/capes
+            bodyGroup.add(backAnchor);
+
+            // 2. Head System
+            headGroup = new THREE.Group();
+            headGroup.position.y = 1.05; // Articulation point
+            bodyGroup.add(headGroup);
+
+            // -- ATTACHMENT ARCHITECTURE (HEAD) --
+            headCenterAnchor = new THREE.Group(); // Center of skull
+            headGroup.add(headCenterAnchor);
+
+            topHeadAnchor = new THREE.Group();
+            topHeadAnchor.position.set(0, 0.75, 0); // Exact top of skull for hats/hair
+            headGroup.add(topHeadAnchor);
+
+            faceAnchor = new THREE.Group();
+            faceAnchor.position.set(0, 0, 0.75); // Exact front of screen for glasses/masks
+            headGroup.add(faceAnchor);
+
+            // Head Mesh (Squashed TV shape)
+            const headMeshGroup = new THREE.Group();
+            const headGeo = new THREE.SphereGeometry(1, 32, 32);
+            const headReal = new THREE.Mesh(headGeo, matPlastic);
+            headReal.scale.set(0.95, 0.75, 0.8);
+            headReal.castShadow = true;
+            headMeshGroup.add(headReal);
+
+            const faceScreen = new THREE.Mesh(new THREE.SphereGeometry(0.98, 32, 16, 0, Math.PI*2, 0, Math.PI/2.5), matScreen);
+            faceScreen.scale.set(0.9, 0.7, 0.81);
+            faceScreen.rotation.x = Math.PI/2;
+            headMeshGroup.add(faceScreen);
+
+            const eyeGeo = new THREE.TorusGeometry(0.12, 0.04, 16, 32);
+            const eyeL = new THREE.Mesh(eyeGeo, matGlow);
+            eyeL.position.set(-0.35, 0.1, 0.81);
+            const eyeR = new THREE.Mesh(eyeGeo, matGlow);
+            eyeR.position.set(0.35, 0.1, 0.81);
+            
+            const smile = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.03, 16, 32, Math.PI), matGlow);
+            smile.rotation.z = Math.PI;
+            smile.position.set(0, -0.15, 0.82);
+            headMeshGroup.add(eyeL, eyeR, smile);
+
+            const earGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.1, 16);
+            earGeo.rotateZ(Math.PI/2);
+            const earL = new THREE.Mesh(earGeo, matDark);
+            earL.position.set(-0.95, 0, 0);
+            const earR = new THREE.Mesh(earGeo, matDark);
+            earR.position.set(0.95, 0, 0);
+            
+            const antGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5);
+            const antL = new THREE.Mesh(antGeo, matWhite);
+            antL.position.set(-0.9, 0.4, 0);
+            antL.rotation.z = Math.PI/6;
+            const antR = new THREE.Mesh(antGeo, matWhite);
+            antR.position.set(0.9, 0.4, 0);
+            antR.rotation.z = -Math.PI/6;
+            
+            const bulbGeo = new THREE.SphereGeometry(0.08, 16, 16);
+            const bulbL = new THREE.Mesh(bulbGeo, matGlow);
+            bulbL.position.set(-1.02, 0.62, 0);
+            const bulbR = new THREE.Mesh(bulbGeo, matGlow);
+            bulbR.position.set(1.02, 0.62, 0);
+
+            headMeshGroup.add(earL, earR, antL, antR, bulbL, bulbR);
+            headGroup.add(headMeshGroup);
+
+            // Limbs - Using CylinderGeometry for widespread Chromebook compatibility
+            const limbGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.6, 16);
+            
+            armL = new THREE.Group();
+            armL.position.set(-0.75, 0.3, 0);
+            const armLMesh = new THREE.Mesh(limbGeo, matPlastic);
+            armLMesh.position.y = -0.3;
+            armLMesh.castShadow = true;
+            armL.add(armLMesh);
+            bodyGroup.add(armL);
+
+            armR = new THREE.Group();
+            armR.position.set(0.75, 0.3, 0);
+            const armRMesh = new THREE.Mesh(limbGeo, matPlastic);
+            armRMesh.position.y = -0.3;
+            armRMesh.castShadow = true;
+            armR.add(armRMesh);
+            bodyGroup.add(armR);
+
+            legL = new THREE.Group();
+            legL.position.set(-0.3, -0.8, 0);
+            const legLMesh = new THREE.Mesh(limbGeo, matWhite);
+            legLMesh.position.y = -0.2;
+            legLMesh.castShadow = true;
+            legL.add(legLMesh);
+            
+            const footGeo = new THREE.BoxGeometry(0.3, 0.15, 0.4);
+            const footL = new THREE.Mesh(footGeo, matPlastic);
+            footL.position.set(0, -0.5, 0.05);
+            footL.castShadow = true;
+            legL.add(footL);
+            robotGroup.add(legL);
+
+            legR = new THREE.Group();
+            legR.position.set(0.3, -0.8, 0);
+            const legRMesh = new THREE.Mesh(limbGeo, matWhite);
+            legRMesh.position.y = -0.2;
+            legRMesh.castShadow = true;
+            legR.add(legRMesh);
+            const footR = new THREE.Mesh(footGeo, matPlastic);
+            footR.position.set(0, -0.5, 0.05);
+            footR.castShadow = true;
+            legR.add(footR);
+            robotGroup.add(legR);
+        }
+
+        function buildAccessories() {
+            const mats = {
+                gold: new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.15, metalness: 0.9 }),
+                fabricBlue: new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.9 }),
+                fabricRed: new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.9 }),
+                fabricGreen: new THREE.MeshStandardMaterial({ color: 0x2ecc71, roughness: 0.9 }),
+                fabricDark: new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 }),
+                fabricBrown: new THREE.MeshStandardMaterial({ color: 0x8e44ad, roughness: 0.9 }), 
+                leather: new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.8 }),
+                coat: new THREE.MeshStandardMaterial({ color: 0xd4c6a9, roughness: 0.9 }),
+                black: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 }),
+                white: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+                glass: new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.1, envMapIntensity: 1.0 }),
+                hairYellow: new THREE.MeshStandardMaterial({ color: 0xf1c40f, roughness: 0.7, flatShading: true })
+            };
+
+            function register(id, type, object) {
+                object.visible = false;
+                window.accessories3D[id] = object;
+                // Strictly map to correct anchor
+                if(type === 'head') topHeadAnchor.add(object);
+                else if(type === 'face') faceAnchor.add(object);
+                else if(type === 'neck') neckAnchor.add(object);
+                else if(type === 'body') bodyAnchor.add(object);
+                else if(type === 'back') backAnchor.add(object);
+            }
+
+            // 1. Cool Cap (topHeadAnchor)
+            const cap = new THREE.Group();
+            const capDome = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricBlue);
+            const capBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.05, 16, 1, false, -Math.PI/2.5, Math.PI/1.25), mats.fabricBlue);
+            capBrim.position.set(0, 0, 0.3);
+            cap.add(capDome, capBrim);
+            // topHeadAnchor is at y=0.75. Lower hat slightly to envelop skull.
+            cap.position.y = -0.1;
+            register('coolCap', 'head', cap);
+
+            // 2. Nerd Glasses (faceAnchor)
+            const glasses = new THREE.Group();
+            const rimG = new THREE.TorusGeometry(0.28, 0.06, 8, 24);
+            const rimL = new THREE.Mesh(rimG, mats.black); rimL.position.set(-0.4, 0, 0.1);
+            const rimR = new THREE.Mesh(rimG, mats.black); rimR.position.set(0.4, 0, 0.1);
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, 0.05), mats.black); bridge.position.set(0, 0, 0.1);
+            // Temples extending from front (z=0.1) back to ears (z=-0.75 relative to faceAnchor)
+            const templeL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.85), mats.black); templeL.position.set(-0.68, 0, -0.3);
+            const templeR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.85), mats.black); templeR.position.set(0.68, 0, -0.3);
+            glasses.add(rimL, rimR, bridge, templeL, templeR);
+            register('nerdGlasses', 'face', glasses);
+
+            // 3. Spiky Hair (topHeadAnchor)
+            const hair = new THREE.Group();
+            for(let i=0; i<30; i++) {
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6 + Math.random()*0.5, 4), mats.hairYellow);
+                const a = Math.random() * Math.PI * 2;
+                const r = Math.random() * 0.7;
+                spike.position.set(Math.cos(a)*r, 0, Math.sin(a)*r);
+                spike.lookAt(spike.position.x * 2, 1, spike.position.z * 2);
+                spike.rotation.x -= Math.PI/2;
+                hair.add(spike);
+            }
+            hair.position.y = -0.15; // sink slightly into skull
+            register('spikyHair', 'head', hair);
+
+            // 4. Basic Tee (bodyAnchor)
+            const tee = new THREE.Group();
+            const teeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.8, 32), mats.fabricRed);
+            const teeTop = new THREE.Mesh(new THREE.SphereGeometry(0.62, 32, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricRed);
+            teeTop.position.y = 0.4;
+            const teeBot = new THREE.Mesh(new THREE.SphereGeometry(0.62, 32, 16, 0, Math.PI*2, Math.PI/2, Math.PI/2), mats.fabricRed);
+            teeBot.position.y = -0.4;
+            tee.add(teeBody, teeTop, teeBot);
+            register('basicTee', 'body', tee);
+
+            // 5. Gamer Phones (headCenterAnchor) - Exception mapping
+            const phones = new THREE.Group();
+            const band = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.08, 16, 32, Math.PI), mats.black);
+            band.position.set(0, 0.1, 0); // Arch over head
+            const cupGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 32);
+            const cupL = new THREE.Mesh(cupGeo, mats.fabricGreen); cupL.rotation.z = Math.PI/2; cupL.position.set(-1.05, 0.1, 0);
+            const cupR = new THREE.Mesh(cupGeo, mats.fabricGreen); cupR.rotation.z = Math.PI/2; cupR.position.set(1.05, 0.1, 0);
+            phones.add(band, cupL, cupR);
+            // We register to headCenterAnchor manually instead of topHeadAnchor to use radius dimensions
+            phones.visible = false;
+            window.accessories3D['headphones'] = phones;
+            headCenterAnchor.add(phones);
+
+            // 6. Winter Scarf (neckAnchor)
+            const scarf = new THREE.Group();
+            const scarfRing = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.18, 16, 32), mats.fabricRed);
+            scarfRing.rotation.x = Math.PI/2; // Lay flat
+            // A Cylinder instead of Capsule to fix Chromebook r128 compat
+            const scarfTail = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.7, 16), mats.fabricRed);
+            scarfTail.position.set(0.4, -0.4, 0.5); scarfTail.rotation.z = -0.2; scarfTail.rotation.x = 0.2;
+            scarf.add(scarfRing, scarfTail);
+            register('scarf', 'neck', scarf);
+
+            // 7. 3D Glasses (faceAnchor)
+            const glasses3d = new THREE.Group();
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.3, 0.05), mats.white);
+            frame.position.set(0, 0, 0.1);
+            const lensL = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.2), new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:0.8}));
+            lensL.position.set(-0.3, 0, 0.13);
+            const lensR = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.2), new THREE.MeshBasicMaterial({color: 0x0000ff, transparent:true, opacity:0.8}));
+            lensR.position.set(0.3, 0, 0.13);
+            const t3dL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.85), mats.white); t3dL.position.set(-0.62, 0, -0.3);
+            const t3dR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.85), mats.white); t3dR.position.set(0.62, 0, -0.3);
+            glasses3d.add(frame, lensL, lensR, t3dL, t3dR);
+            register('3dGlasses', 'face', glasses3d);
+
+            // 8. Propeller Hat (topHeadAnchor)
+            const beanie = new THREE.Group();
+            const bDome = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricGreen);
+            const bPin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2), mats.black); bPin.position.y = 0.9;
+            const bProp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.1), mats.fabricRed); bProp.position.y = 1.0;
+            bProp.userData.isPropeller = true; 
+            beanie.add(bDome, bPin, bProp);
+            beanie.position.y = -0.1;
+            register('beanie', 'head', beanie);
+
+            // 9. Pirate Patch (faceAnchor)
+            const patch = new THREE.Group();
+            const pCover = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), mats.black);
+            pCover.rotation.x = Math.PI/2; pCover.position.set(-0.35, 0.1, 0.1);
+            const pBand = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.02, 32, 1, true), mats.black);
+            pBand.position.set(0, 0.1, -0.75); // Centers the band back around the origin of the head
+            patch.add(pCover, pBand);
+            register('eyePatch', 'face', patch);
+
+            // 10. Detective Coat (bodyAnchor)
+            const coat = new THREE.Group();
+            const cBody = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.8, 1.2, 16), mats.coat);
+            const cCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.66, 0.2, 16, 1, true), mats.coat);
+            cCollar.position.y = 0.6;
+            coat.add(cBody, cCollar);
+            register('trenchCoat', 'body', coat);
+
+            // 11. Explorer Hat (topHeadAnchor)
+            const expHat = new THREE.Group();
+            const exDome = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.leather);
+            exDome.scale.y = 0.8;
+            const exBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.05, 24), mats.leather);
+            expHat.add(exDome, exBrim);
+            expHat.position.y = -0.05;
+            register('explorerHat', 'head', expHat);
+
+            // 12. Ninja Mask (faceAnchor)
+            const ninja = new THREE.Group();
+            // Covers lower half of head
+            const nMask = new THREE.Mesh(new THREE.CylinderGeometry(0.96, 0.96, 0.5, 32, 1, true, -Math.PI/2, Math.PI), mats.black);
+            nMask.position.set(0, -0.2, -0.75); 
+            ninja.add(nMask);
+            register('ninjaMask', 'face', ninja);
+
+            // 13. Wizard Hat (topHeadAnchor)
+            const wizHat = new THREE.Group();
+            const wBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.05, 32), mats.fabricDark);
+            const wCone = new THREE.Mesh(new THREE.ConeGeometry(0.9, 2.0, 16), mats.fabricDark);
+            wCone.position.set(0, 1.0, -0.2); // Shift point backwards
+            wCone.rotation.x = -0.2; 
+            wizHat.add(wBrim, wCone);
+            wizHat.position.y = -0.05;
+            register('wizardHat', 'head', wizHat);
+
+            // 14. Magic Robe (bodyAnchor)
+            const robe = new THREE.Group();
+            const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.85, 1.3, 16), mats.fabricBrown);
+            for(let i=0; i<8; i++) {
+                const star = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), mats.gold);
+                const angle = (i/8)*Math.PI*2;
+                star.position.set(Math.cos(angle)*0.75, (i%2==0)?0.3:-0.3, Math.sin(angle)*0.75);
+                rBody.add(star);
+            }
+            robe.add(rBody);
+            register('wizardRobe', 'body', robe);
+
+            // 15. Hero Cape (backAnchor)
+            const cape = new THREE.Group();
+            const cCloth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.4, 0.05), mats.fabricRed);
+            cCloth.position.set(0, -0.5, -0.1);
+            cape.rotation.x = 0.2; 
+            cape.add(cCloth);
+            register('heroCape', 'back', cape);
+
+            // 16. Astro Helmet (headCenterAnchor) - Complete Procedural Overhaul
+            const astro = new THREE.Group();
+            // Outer Visor (Transparent Glass)
+            const aGlass = new THREE.Mesh(new THREE.SphereGeometry(1.25, 32, 32), mats.glass);
+            // Inner Shell (Opaque, covers back and top, leaves front open)
+            // phiStart=PI/4, phiLength=1.5*PI cuts out a 90 deg wedge at the front
+            const aShell = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32, Math.PI * 0.25, Math.PI * 1.5), mats.white);
+            // Base sealing ring
+            const aRing = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.15, 16, 32), mats.white);
+            aRing.rotation.x = Math.PI / 2;
+            aRing.position.y = -0.8;
+            astro.add(aGlass, aShell, aRing);
+            astro.visible = false;
+            window.accessories3D['astronaut'] = astro;
+            headCenterAnchor.add(astro); // Attach to center of head
+
+            // 17. Royal Crown (topHeadAnchor) - Procedural Fixes
+            const crown = new THREE.Group();
+            const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.75, 0.2, 32), mats.gold);
+            for(let i=0; i<6; i++){
+                const angle = (i/6)*Math.PI*2;
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.6, 16), mats.gold);
+                spike.position.set(Math.cos(angle)*0.65, 0.3, Math.sin(angle)*0.65);
+                spike.rotation.x = -Math.cos(angle)*0.15;
+                spike.rotation.z = Math.sin(angle)*0.15;
+                const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), (i%2===0) ? mats.fabricRed : mats.fabricBlue);
+                jewel.position.set(0, 0.35, 0);
+                spike.add(jewel);
+                crown.add(spike);
+            }
+            crown.add(cBase);
+            crown.position.y = -0.1;
+            register('kingCrown', 'head', crown);
+
+            // 18. Champion Medal (neckAnchor)
+            const medalGroup = new THREE.Group();
+            const mRibbon = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.06, 16, 32), mats.fabricBlue);
+            mRibbon.rotation.x = Math.PI / 2;
+            mRibbon.rotation.x -= 0.2; // Drapes down
+            mRibbon.position.set(0, -0.1, 0.1);
+            const mCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 32), mats.gold);
+            mCoin.rotation.x = Math.PI / 2;
+            mCoin.position.set(0, -0.7, 0.78); // Hangs clear of the chest
+            medalGroup.add(mRibbon, mCoin);
+            register('goldenMedal', 'neck', medalGroup);
+
+            // 19. Dragon Wings (backAnchor) - Stylized geometric wings
+            const wings = new THREE.Group();
+            function makeWing(isLeft) {
+                const wg = new THREE.Group();
+                const sign = isLeft ? -1 : 1;
+                const spar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.02, 1.8), mats.fabricDark);
+                spar.rotation.z = (Math.PI / 3) * sign;
+                spar.position.set(0.7 * sign, 0.6, 0);
+                const m1 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.2, 0.05), mats.fabricGreen);
+                m1.position.set(0.7 * sign, 0.1, 0);
+                m1.rotation.z = (Math.PI / 6) * sign;
+                const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.05), mats.fabricGreen);
+                m2.position.set(1.4 * sign, 0.3, 0);
+                m2.rotation.z = (Math.PI / 4) * sign;
+                wg.add(spar, m1, m2);
+                return wg;
+            }
+            wings.add(makeWing(true), makeWing(false));
+            register('dragonWings', 'back', wings);
+        }
+
         function animate() {
             requestAnimationFrame(animate);
-            clock += 0.05;
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
             
-            // Animação de dança suave e fluida
-            robotGroup.position.y = Math.sin(clock) * 0.1;
-            headGroup.rotation.z = Math.sin(clock * 0.5) * 0.05;
-            headGroup.rotation.y = Math.sin(clock * 0.3) * 0.1; // Cabeça mexendo e roupas acompanhando
-            
-            armL.rotation.x = Math.sin(clock) * 0.5;
-            armR.rotation.x = -Math.sin(clock) * 0.5;
+            if(robotGroup && !isInspectorActive) {
+                // Idle breathing animation
+                robotGroup.position.y = Math.sin(time * 2) * 0.05;
+                bodyGroup.scale.y = 1.0 + Math.sin(time * 4) * 0.02;
+                
+                // Head idle sway
+                headGroup.rotation.y = Math.sin(time * 0.5) * 0.15;
+                headGroup.rotation.z = Math.sin(time * 0.8) * 0.05;
+
+                // Arm swinging
+                armL.rotation.x = Math.sin(time * 2) * 0.1;
+                armR.rotation.x = -Math.sin(time * 2) * 0.1;
+                armL.rotation.z = 0.1 + Math.sin(time * 1.5) * 0.05;
+                armR.rotation.z = -0.1 - Math.sin(time * 1.5) * 0.05;
+            }
+
+            // Animate Propeller hat if equipped and active
+            if(window.accessories3D && window.accessories3D['beanie']) {
+                const beanie = window.accessories3D['beanie'];
+                if(beanie.visible) {
+                    beanie.children.forEach(c => {
+                        if(c.userData.isPropeller) c.rotation.y -= 10 * delta;
+                    });
+                }
+            }
 
             renderer.render(scene, camera);
         }
 
-        // Inicializa o Mascote 3D assim que a página terminar de carregar
+        let isInspectorActive = false;
+        let inspectedItemId = "";
+        let originalCameraPosition = null;
+        let originalRobotRotation = null;
+
+        function toggleInspector() {
+            isInspectorActive = !isInspectorActive;
+            const overlay = document.getElementById('inspector-overlay');
+            const target = document.getElementById('inspector-viewport-target');
+            const wrapper = document.getElementById('canvas-wrapper');
+            const canvasContainer = document.getElementById('canvas-container');
+
+            if(isInspectorActive) {
+                overlay.classList.add('active');
+                target.appendChild(canvasContainer);
+                
+                // Reset pose for inspection
+                originalCameraPosition = camera.position.clone();
+                originalRobotRotation = robotGroup.rotation.y;
+                robotGroup.position.y = 0;
+                bodyGroup.scale.y = 1;
+                headGroup.rotation.set(0,0,0);
+                armL.rotation.set(0,0,0);
+                armR.rotation.set(0,0,0);
+
+                setTimeout(() => { if(window.resize3D) window.resize3D(); }, 100);
+            } else {
+                overlay.classList.remove('active');
+                wrapper.appendChild(canvasContainer);
+                inspectedItemId = ""; // Clear inspection focus
+                updateMascotVisuals();
+                
+                // Restore camera
+                if(originalCameraPosition) camera.position.copy(originalCameraPosition);
+                robotGroup.rotation.y = originalRobotRotation || 0;
+                
+                setTimeout(() => { if(window.resize3D) window.resize3D(); }, 100);
+            }
+        }
+
+        function populateInspectorDropdown() {
+            const select = document.getElementById('inspector-item-select');
+            if(!select || select.options.length > 1) return;
+            shopItems.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.text = `[${item.type.toUpperCase()}] ${item.name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function inspectItem(id) {
+            inspectedItemId = id;
+            updateMascotVisuals();
+            
+            const itemDef = shopItems.find(i => i.id === id);
+            const itemObj = window.accessories3D[id];
+            
+            document.getElementById('insp-id').innerText = id || "None";
+            document.getElementById('insp-type').innerText = itemDef ? itemDef.type : "None";
+            document.getElementById('insp-parent').innerText = itemObj && itemObj.parent ? "Anchor Node" : "None";
+            document.getElementById('validation-results').innerText = "Waiting for validation...";
+        }
+
+        function runFitValidation() {
+            const res = document.getElementById('validation-results');
+            if(!inspectedItemId || !window.accessories3D[inspectedItemId]) {
+                res.innerHTML = "<span class='text-red-400'>No item selected.</span>";
+                return;
+            }
+
+            const item = window.accessories3D[inspectedItemId];
+            const def = shopItems.find(i => i.id === inspectedItemId);
+            
+            // Compute global bounding boxes
+            const itemBox = new THREE.Box3().setFromObject(item);
+            const headBox = new THREE.Box3().setFromObject(headGroup);
+            const bodyBox = new THREE.Box3().setFromObject(bodyGroup);
+            
+            let warnings = [];
+            
+            if (itemBox.isEmpty()) warnings.push("Geometry is empty or invisible.");
+            
+            const size = itemBox.getSize(new THREE.Vector3());
+            if (size.x > 5 || size.y > 5 || size.z > 5) warnings.push("Item bounds are unusually large.");
+            if (size.x < 0.05 && size.y < 0.05) warnings.push("Item bounds are unusually small.");
+            
+            // Anatomical intersection heuristics
+            if (def) {
+                if (def.type === 'head') {
+                    // Headwear shouldn't sink below the middle of the skull
+                    if (itemBox.min.y < headBox.max.y - 1.2) warnings.push("Hat sinks deeply into the head geometry.");
+                }
+                if (def.type === 'face') {
+                    // Face accessories shouldn't be deep inside the head Z-wise
+                    if (itemBox.max.z < headBox.max.z - 0.2) warnings.push("Accessory is buried inside the head volume.");
+                }
+            }
+
+            if(warnings.length === 0) {
+                res.innerHTML = `<span class='text-green-400'>✔️ PASS. Plausible bounds and dimensions.\nSize: ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}</span>`;
+            } else {
+                res.innerHTML = `<span class='text-yellow-400'>⚠️ WARNINGS:\n- ${warnings.join('\n- ')}</span>`;
+            }
+        }
+
+        let isMascotVisible = true;
+        function toggleMascotVisibility() {
+            isMascotVisible = !isMascotVisible;
+            bodyGroup.children.forEach(child => {
+                if(child !== headGroup && child.type === "Mesh" || child.type === "Group") {
+                    if(!child.isAnchor) child.visible = isMascotVisible;
+                }
+            });
+            headGroup.children.forEach(child => {
+                if(child.type === "Mesh" || child.type === "Group") {
+                    if(!child.isAnchor) child.visible = isMascotVisible;
+                }
+            });
+            // Ensure inspected item remains visible
+            if(inspectedItemId && window.accessories3D[inspectedItemId]) {
+                window.accessories3D[inspectedItemId].visible = true;
+            }
+        }
+
+        function resetInspectorView() {
+            camera.position.set(0, 1.8, 8);
+            robotGroup.rotation.set(0,0,0);
+        }
+
         window.onload = function() {
+            loadData(); 
             init3D();
         };
 
