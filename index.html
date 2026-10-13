@@ -295,7 +295,7 @@
             <!-- 3D Mascot Preview Area -->
             <div class="w-full lg:w-5/12 flex flex-col items-center bg-white/40 backdrop-blur-sm rounded-3xl p-4 border-4 border-white shadow-xl relative">
                 <div class="absolute top-6 left-6 z-10 flex gap-2 flex-col">
-                    <button onclick="resetMascot()" class="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-400 font-bold text-sm" title="Remove all items">🔄 Reset Look</button>
+                    <button onclick="resetMascot()" class="bg-red-500 text-white px-3 py-2 rounded-full shadow hover:bg-red-400 font-bold text-xs transition hover:scale-105" title="Remove all items">🔄 Reset Look</button>
                 </div>
                 
                 <!-- The Canvas Container (Moves to Inspector when needed) -->
@@ -303,8 +303,46 @@
                     <div id="canvas-container"></div>
                 </div>
 
-                <p class="mt-4 text-2xl font-bold text-gray-700 title-font bg-white px-8 py-3 rounded-full shadow-md">Meet Bytes! 🤖</p>
-                <p class="text-sm font-bold text-gray-600 mt-2 text-center">Swipe or drag to rotate camera</p>
+                <!-- Customization Studio Controls (Colors & Animations) -->
+                <div class="w-full bg-white/90 rounded-2xl p-3 mt-3 shadow-md border-2 border-purple-200 flex flex-col gap-3">
+                    <!-- Animation Selector -->
+                    <div class="flex justify-between items-center gap-1 bg-purple-100 p-1.5 rounded-xl">
+                        <button onclick="setRobotAnim('idle')" id="anim-btn-idle" class="anim-btn flex-1 py-1.5 px-2 rounded-lg font-black text-xs bg-purple-600 text-white shadow transition">😌 Idle</button>
+                        <button onclick="setRobotAnim('dance')" id="anim-btn-dance" class="anim-btn flex-1 py-1.5 px-2 rounded-lg font-black text-xs text-purple-800 hover:bg-purple-200 transition">💃 Dance</button>
+                        <button onclick="setRobotAnim('cheer')" id="anim-btn-cheer" class="anim-btn flex-1 py-1.5 px-2 rounded-lg font-black text-xs text-purple-800 hover:bg-purple-200 transition">🙌 Cheer</button>
+                        <button onclick="setRobotAnim('wave')" id="anim-btn-wave" class="anim-btn flex-1 py-1.5 px-2 rounded-lg font-black text-xs text-purple-800 hover:bg-purple-200 transition">👋 Wave</button>
+                    </div>
+
+                    <!-- Robot Paint Swatches -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-black text-gray-600 uppercase tracking-wider">🤖 Robot Color:</span>
+                        <div class="flex gap-1.5" id="robot-color-swatches">
+                            <button onclick="setRobotColor('#8ec5fc')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#8ec5fc"></button>
+                            <button onclick="setRobotColor('#f472b6')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#f472b6"></button>
+                            <button onclick="setRobotColor('#34d399')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#34d399"></button>
+                            <button onclick="setRobotColor('#fbbf24')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#fbbf24"></button>
+                            <button onclick="setRobotColor('#a78bfa')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#a78bfa"></button>
+                            <button onclick="setRobotColor('#f87171')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#f87171"></button>
+                            <button onclick="setRobotColor('#475569')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#475569"></button>
+                        </div>
+                    </div>
+
+                    <!-- Outfit / Accessory Dye Swatches -->
+                    <div class="flex items-center justify-between px-1 border-t border-gray-200 pt-2">
+                        <span class="text-xs font-black text-gray-600 uppercase tracking-wider">👕 Outfit Dye:</span>
+                        <div class="flex gap-1.5" id="outfit-color-swatches">
+                            <button onclick="setOutfitColor('#ef4444')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#ef4444"></button>
+                            <button onclick="setOutfitColor('#3b82f6')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#3b82f6"></button>
+                            <button onclick="setOutfitColor('#10b981')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#10b981"></button>
+                            <button onclick="setOutfitColor('#8b5cf6')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#8b5cf6"></button>
+                            <button onclick="setOutfitColor('#f59e0b')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#f59e0b"></button>
+                            <button onclick="setOutfitColor('#ec4899')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#ec4899"></button>
+                            <button onclick="setOutfitColor('#1e293b')" class="w-6 h-6 rounded-full border-2 border-white shadow-md hover:scale-125 transition" style="background:#1e293b"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-xs font-bold text-gray-600 mt-2 text-center">Swipe or drag on Bytes to rotate camera</p>
             </div>
 
             <!-- Shop Item Grid -->
@@ -465,7 +503,10 @@
         let currentData = [];
         let builderSelectedWords = [];
         let isTransitioning = false;
-        const STORAGE_KEY = 'transportQuestData_v4'; // Incremented key to ensure clean state
+        let robotPrimaryColor = '#8ec5fc';
+        let outfitPrimaryColor = null;
+        let currentAnimMode = 'idle';
+        const STORAGE_KEY = 'transportQuestData_v5'; // Incremented key for color customization support
 
         function loadData() {
             try {
@@ -473,6 +514,8 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     score = parsed.score || 0;
+                    robotPrimaryColor = parsed.robotColor || '#8ec5fc';
+                    outfitPrimaryColor = parsed.outfitColor || null;
                     shopItems = initialShopItems.map(baseItem => {
                         const savedItem = parsed.items ? parsed.items.find(i => i.id === baseItem.id) : null;
                         return {
@@ -497,11 +540,42 @@
             try {
                 const dataToSave = {
                     score: score,
+                    robotColor: robotPrimaryColor,
+                    outfitColor: outfitPrimaryColor,
                     items: shopItems.map(i => ({ id: i.id, unlocked: i.unlocked, equipped: i.equipped }))
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
             } catch(e) {
                 console.error("Error saving data", e);
+            }
+        }
+
+        function setRobotColor(hex) {
+            robotPrimaryColor = hex;
+            if (window.matRobotPrimary) {
+                window.matRobotPrimary.color.set(hex);
+            }
+            saveData();
+        }
+
+        function setOutfitColor(hex) {
+            outfitPrimaryColor = hex;
+            if (window.dyeableMaterials) {
+                window.dyeableMaterials.forEach(mat => mat.color.set(hex));
+            }
+            saveData();
+        }
+
+        function setRobotAnim(mode) {
+            currentAnimMode = mode;
+            document.querySelectorAll('.anim-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-600', 'text-white', 'shadow');
+                btn.classList.add('text-purple-800');
+            });
+            const activeBtn = document.getElementById('anim-btn-' + mode);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-purple-600', 'text-white', 'shadow');
+                activeBtn.classList.remove('text-purple-800');
             }
         }
 
@@ -603,6 +677,10 @@
 
         function resetMascot() {
             shopItems.forEach(i => i.equipped = false);
+            robotPrimaryColor = '#8ec5fc';
+            outfitPrimaryColor = null;
+            if (window.matRobotPrimary) window.matRobotPrimary.color.set(robotPrimaryColor);
+            if (window.resetOutfitDefaultColors) window.resetOutfitDefaultColors();
             saveData();
             renderShop();
         }
@@ -610,11 +688,21 @@
         function updateMascotVisuals() {
             if (!window.accessories3D) return;
             Object.values(window.accessories3D).forEach(acc => { if(acc) acc.visible = false; });
+            if (window.sleeveAccessories3D) {
+                Object.values(window.sleeveAccessories3D).forEach(slv => {
+                    if (slv.L) slv.L.visible = false;
+                    if (slv.R) slv.R.visible = false;
+                });
+            }
             
             // If we are actively inspecting one item, ONLY show that item.
             if(isInspectorActive && inspectedItemId) {
                 if(window.accessories3D[inspectedItemId]) {
                     window.accessories3D[inspectedItemId].visible = true;
+                }
+                if(window.sleeveAccessories3D && window.sleeveAccessories3D[inspectedItemId]) {
+                    window.sleeveAccessories3D[inspectedItemId].L.visible = true;
+                    window.sleeveAccessories3D[inspectedItemId].R.visible = true;
                 }
                 return;
             }
@@ -623,6 +711,10 @@
             shopItems.forEach(item => {
                 if (item.equipped && window.accessories3D[item.id]) {
                     window.accessories3D[item.id].visible = true;
+                    if (window.sleeveAccessories3D && window.sleeveAccessories3D[item.id]) {
+                        window.sleeveAccessories3D[item.id].L.visible = true;
+                        window.sleeveAccessories3D[item.id].R.visible = true;
+                    }
                 }
             });
         }
@@ -868,506 +960,864 @@
         let scene, camera, renderer, clock;
         let robotGroup, bodyGroup, headGroup;
         // Strictly defined anatomical anchors
-        let headCenterAnchor, topHeadAnchor, faceAnchor, neckAnchor, bodyAnchor, backAnchor;
-        let armL, armR, legL, legR;
+        let headCenterAnchor, topHeadAnchor, faceAnchor, neckAnchor, bodyAnchor, backAnchor, armLAnchor, armRAnchor;
+        let armL, armR, forearmL, forearmR, legL, legR, eyeL, eyeR, browL, browR, bulbL, bulbR;
         window.accessories3D = {}; 
+        window.sleeveAccessories3D = {};
+        window.dyeableMaterials = [];
 
         function init3D() {
             const container = document.getElementById('canvas-container');
-            if(renderer) return; 
-            
+            if (!container) return;
+
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0xd4e4f7, 0.05);
+            clock = new THREE.Clock();
 
-            camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 1.8, 8); 
+            const width = container.clientWidth || 400;
+            const height = container.clientHeight || 450;
 
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+            camera.position.set(0, 0.5, 6.2);
+            camera.lookAt(0, 0.3, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.innerHTML = '';
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+            // Lighting setup
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x94a3b8, 0.9);
             hemiLight.position.set(0, 10, 0);
             scene.add(hemiLight);
 
-            const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
-            mainLight.position.set(5, 10, 7);
-            mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 1024;
-            mainLight.shadow.mapSize.height = 1024;
-            mainLight.shadow.camera.near = 0.5;
-            mainLight.shadow.camera.far = 25;
-            mainLight.shadow.camera.left = -5;
-            mainLight.shadow.camera.right = 5;
-            mainLight.shadow.camera.top = 5;
-            mainLight.shadow.camera.bottom = -5;
-            mainLight.shadow.bias = -0.001;
-            scene.add(mainLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+            dirLight.position.set(4, 8, 6);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
 
-            const fillLight = new THREE.DirectionalLight(0x90b0d0, 0.4);
-            fillLight.position.set(-5, 3, -5);
+            const fillLight = new THREE.DirectionalLight(0xe0c3fc, 0.4);
+            fillLight.position.set(-4, 2, -4);
             scene.add(fillLight);
 
-            // Ground shadow plane
-            const floorGeo = new THREE.PlaneGeometry(20, 20);
-            const floorMat = new THREE.ShadowMaterial({ opacity: 0.2 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -1.2;
-            floor.receiveShadow = true;
-            scene.add(floor);
+            // Subtle floor shadow disc
+            const shadowGeo = new THREE.CircleGeometry(1.3, 32);
+            const shadowMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.3 });
+            const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+            shadowMesh.rotation.x = -Math.PI / 2;
+            shadowMesh.position.y = -1.45;
+            scene.add(shadowMesh);
 
             buildMascot();
             buildAccessories();
+            updateMascotVisuals();
+
+            // Interactive drag-to-rotate controls
+            const element = renderer.domElement;
+            let isDragging = false;
+            let prevX = 0;
+
+            const onDown = (e) => {
+                isDragging = true;
+                prevX = e.touches ? e.touches[0].clientX : e.clientX;
+            };
+            const onUp = () => { isDragging = false; };
+            const onMove = (e) => {
+                if (!isDragging || !robotGroup) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const deltaX = clientX - prevX;
+                robotGroup.rotation.y += deltaX * 0.012;
+                prevX = clientX;
+            };
+
+            element.addEventListener('mousedown', onDown);
+            element.addEventListener('touchstart', onDown, { passive: true });
+            window.addEventListener('mouseup', onUp);
+            window.addEventListener('touchend', onUp);
+            element.addEventListener('mousemove', onMove);
+            element.addEventListener('touchmove', onMove, { passive: true });
 
             window.resize3D = function() {
-                const activeContainer = document.getElementById('canvas-container').parentElement;
-                if(!activeContainer || activeContainer.clientWidth === 0) return;
-                const width = activeContainer.clientWidth;
-                const height = activeContainer.clientHeight;
-                camera.aspect = width / height;
+                if (!container || !renderer || !camera) return;
+                const w = container.clientWidth || 400;
+                const h = container.clientHeight || 450;
+                camera.aspect = w / h;
                 camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
+                renderer.setSize(w, h);
             };
             window.addEventListener('resize', window.resize3D);
 
-            setupInteraction(container);
-
-            clock = new THREE.Clock();
             animate();
-            updateMascotVisuals();
-        }
-
-        function setupInteraction(element) {
-            let isDragging = false, prevX = 0;
-            const onDown = e => { isDragging = true; prevX = e.clientX || e.touches[0].clientX; };
-            const onUp = () => { isDragging = false; };
-            const onMove = e => {
-                if(isDragging && robotGroup) {
-                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-                    if(clientX !== undefined) {
-                        const delta = clientX - prevX;
-                        robotGroup.rotation.y += delta * 0.01;
-                        prevX = clientX;
-                    }
-                }
-            };
-            element.addEventListener('mousedown', onDown);
-            element.addEventListener('touchstart', onDown, {passive: true});
-            window.addEventListener('mouseup', onUp);
-            window.addEventListener('touchend', onUp);
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('touchmove', onMove, {passive: true});
         }
 
         function buildMascot() {
             robotGroup = new THREE.Group();
             scene.add(robotGroup);
 
-            // Materials - High quality stylized look
-            const matPlastic = new THREE.MeshStandardMaterial({ color: 0x8ec5fc, roughness: 0.3, metalness: 0.1 }); 
-            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-            const matScreen = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.6 });
-            const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-            const matDark = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 });
+            // Materials - Matte Soft Toy Vinyl look inspired by reference image
+            window.matRobotPrimary = new THREE.MeshStandardMaterial({ color: robotPrimaryColor, roughness: 0.45, metalness: 0.08 }); 
+            const matPlastic = window.matRobotPrimary;
+            const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4, metalness: 0.05 });
+            const matCream = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5, metalness: 0.1 });
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.2 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+            const matGlowInner = new THREE.MeshBasicMaterial({ color: 0xa5f3fc });
+            const matBootRed = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
+            const matBootYellow = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.4 });
 
             // 1. Root Body
             bodyGroup = new THREE.Group();
-            bodyGroup.position.y = -0.1;
+            bodyGroup.position.y = -0.12;
             robotGroup.add(bodyGroup);
 
-            // Torso (Stylized pill shape)
+            // Torso (Chubby stylized white armored chassis with waist seam and diaper-style lower pelvis)
             const torsoGroup = new THREE.Group();
-            const torsoMid = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.8, 32), matWhite);
-            const torsoTop = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 16, 0, Math.PI*2, 0, Math.PI/2), matWhite);
-            torsoTop.position.y = 0.4;
-            const torsoBot = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 16, 0, Math.PI*2, Math.PI/2, Math.PI/2), matWhite);
-            torsoBot.position.y = -0.4;
-            torsoMid.castShadow = torsoTop.castShadow = torsoBot.castShadow = true;
-            torsoGroup.add(torsoMid, torsoTop, torsoBot);
+            const upperChest = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.61, 0.62, 32), matWhite);
+            upperChest.position.y = 0.15;
+            const chestTop = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 16, 0, Math.PI*2, 0, Math.PI/2), matWhite);
+            chestTop.scale.y = 0.45;
+            chestTop.position.y = 0.46;
+
+            // Waist seam ring
+            const waistSeam = new THREE.Mesh(new THREE.TorusGeometry(0.605, 0.022, 12, 32), matDark);
+            waistSeam.rotation.x = Math.PI/2;
+            waistSeam.position.y = -0.15;
+
+            // Lower rounded pelvis section
+            const lowerPelvis = new THREE.Mesh(new THREE.SphereGeometry(0.61, 32, 16, 0, Math.PI*2, Math.PI/2, Math.PI/2), matWhite);
+            lowerPelvis.scale.y = 0.72;
+            lowerPelvis.position.y = -0.16;
+
+            // Neck collar ring
+            const neckCollar = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.055, 16, 32), matCream);
+            neckCollar.rotation.x = Math.PI/2;
+            neckCollar.position.y = 0.66;
+
+            upperChest.castShadow = chestTop.castShadow = lowerPelvis.castShadow = true;
+            torsoGroup.add(upperChest, chestTop, waistSeam, lowerPelvis, neckCollar);
             bodyGroup.add(torsoGroup);
 
-            const belly = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 32), matPlastic);
-            belly.rotation.x = Math.PI/2;
-            belly.position.set(0, -0.1, 0.58);
-            bodyGroup.add(belly);
+            // Chest Core Badge (Multi-layered glowing turbine from reference)
+            const coreOuterRim = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.05, 16, 32), matWhite);
+            coreOuterRim.position.set(0, 0.14, 0.56);
+            const coreHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.06, 32), matDark);
+            coreHousing.rotation.x = Math.PI/2;
+            coreHousing.position.set(0, 0.14, 0.55);
+            const coreGlowRing = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.035, 16, 32), matGlow);
+            coreGlowRing.position.set(0, 0.14, 0.59);
+            const coreCenter = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), matGlowInner);
+            coreCenter.position.set(0, 0.14, 0.595);
+            bodyGroup.add(coreOuterRim, coreHousing, coreGlowRing, coreCenter);
 
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.3, 16), matDark);
-            neck.position.y = 0.8;
-            bodyGroup.add(neck);
+            // 4 Decorative Chest Screws/Rivets (like reference image)
+            const screwPositions = [
+                [-0.32, 0.36, 0.49], [0.32, 0.36, 0.49],
+                [-0.34, -0.06, 0.51], [0.34, -0.06, 0.51]
+            ];
+            screwPositions.forEach(([sx, sy, sz], idx) => {
+                const screwGroup = new THREE.Group();
+                const sBase = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.03, 16), idx < 2 ? matPlastic : matCream);
+                sBase.rotation.x = Math.PI/2;
+                const sSlot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.015, 0.02), matDark);
+                sSlot.position.z = 0.015;
+                sSlot.rotation.z = idx % 2 === 0 ? 0.5 : -0.5;
+                screwGroup.add(sBase, sSlot);
+                screwGroup.position.set(sx, sy, sz);
+                screwGroup.lookAt(sx * 2, sy, sz * 3);
+                bodyGroup.add(screwGroup);
+            });
 
             // -- ATTACHMENT ARCHITECTURE (BODY) --
-            bodyAnchor = new THREE.Group(); // Center of mass for shirts/coats
+            bodyAnchor = new THREE.Group();
             bodyGroup.add(bodyAnchor);
 
             neckAnchor = new THREE.Group();
-            neckAnchor.position.set(0, 0.75, 0); // Base of neck for scarfs/medals
+            neckAnchor.position.set(0, 0.68, 0);
             bodyGroup.add(neckAnchor);
 
             backAnchor = new THREE.Group();
-            backAnchor.position.set(0, 0.2, -0.6); // For wings/capes
+            backAnchor.position.set(0, 0.22, -0.56);
             bodyGroup.add(backAnchor);
 
-            // 2. Head System
+            // 2. Head System (Smooth Matte Toy Head matching reference image)
             headGroup = new THREE.Group();
-            headGroup.position.y = 1.05; // Articulation point
+            headGroup.position.y = 1.08;
             bodyGroup.add(headGroup);
 
             // -- ATTACHMENT ARCHITECTURE (HEAD) --
-            headCenterAnchor = new THREE.Group(); // Center of skull
+            headCenterAnchor = new THREE.Group();
             headGroup.add(headCenterAnchor);
 
             topHeadAnchor = new THREE.Group();
-            topHeadAnchor.position.set(0, 0.75, 0); // Exact top of skull for hats/hair
+            topHeadAnchor.position.set(0, 0.72, 0);
             headGroup.add(topHeadAnchor);
 
             faceAnchor = new THREE.Group();
-            faceAnchor.position.set(0, 0, 0.75); // Exact front of screen for glasses/masks
+            faceAnchor.position.set(0, 0, 0.78);
             headGroup.add(faceAnchor);
 
-            // Head Mesh (Squashed TV shape)
             const headMeshGroup = new THREE.Group();
-            const headGeo = new THREE.SphereGeometry(1, 32, 32);
+            const headGeo = new THREE.SphereGeometry(0.96, 36, 32);
             const headReal = new THREE.Mesh(headGeo, matPlastic);
-            headReal.scale.set(0.95, 0.75, 0.8);
+            headReal.scale.set(1.0, 0.78, 0.84);
             headReal.castShadow = true;
             headMeshGroup.add(headReal);
 
-            const faceScreen = new THREE.Mesh(new THREE.SphereGeometry(0.98, 32, 16, 0, Math.PI*2, 0, Math.PI/2.5), matScreen);
-            faceScreen.scale.set(0.9, 0.7, 0.81);
-            faceScreen.rotation.x = Math.PI/2;
-            headMeshGroup.add(faceScreen);
+            // Top Skull Cap Plate (from reference)
+            const skullCap = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 16, 0, Math.PI*2, 0, Math.PI/3), matCream);
+            skullCap.scale.set(1.1, 0.45, 0.95);
+            skullCap.position.y = 0.58;
+            headMeshGroup.add(skullCap);
 
-            const eyeGeo = new THREE.TorusGeometry(0.12, 0.04, 16, 32);
-            const eyeL = new THREE.Mesh(eyeGeo, matGlow);
-            eyeL.position.set(-0.35, 0.1, 0.81);
-            const eyeR = new THREE.Mesh(eyeGeo, matGlow);
-            eyeR.position.set(0.35, 0.1, 0.81);
-            
-            const smile = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.03, 16, 32, Math.PI), matGlow);
+            // Expressive Dark Recess Eyes + Glowing Cyan Rings (matching reference)
+            function createExpressiveEye(isLeft) {
+                const eg = new THREE.Group();
+                const sign = isLeft ? -1 : 1;
+                const socket = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.05, 24), matDark);
+                socket.rotation.x = Math.PI/2;
+                const glowRing = new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.032, 16, 32), matGlow);
+                glowRing.position.z = 0.028;
+                const pupil = new THREE.Mesh(new THREE.CircleGeometry(0.08, 20), matDark);
+                pupil.position.z = 0.026;
+                const spec = new THREE.Mesh(new THREE.CircleGeometry(0.028, 12), matWhite);
+                spec.position.set(0.04 * sign, 0.04, 0.03);
+                eg.add(socket, glowRing, pupil, spec);
+                eg.position.set(0.34 * sign, 0.08, 0.77);
+                eg.rotation.y = 0.22 * sign;
+                return eg;
+            }
+            eyeL = createExpressiveEye(true);
+            eyeR = createExpressiveEye(false);
+
+            // Floating Eyebrows & Cheek Whiskers (matching reference)
+            const browGeo = new THREE.BoxGeometry(0.22, 0.048, 0.04);
+            browL = new THREE.Mesh(browGeo, matDark);
+            browL.position.set(-0.34, 0.33, 0.75);
+            browL.rotation.set(0, -0.22, 0.14);
+            browR = new THREE.Mesh(browGeo, matDark);
+            browR.position.set(0.34, 0.33, 0.75);
+            browR.rotation.set(0, 0.22, -0.14);
+
+            // Cute cheek dimple marks
+            [-1, 1].forEach(sign => {
+                const dimple1 = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.03, 0.03), matDark);
+                dimple1.position.set(0.58 * sign, -0.05, 0.65);
+                dimple1.rotation.y = 0.45 * sign;
+                dimple1.rotation.z = -0.2 * sign;
+                const dimple2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.03), matDark);
+                dimple2.position.set(0.55 * sign, -0.12, 0.66);
+                dimple2.rotation.y = 0.45 * sign;
+                dimple2.rotation.z = 0.15 * sign;
+                headMeshGroup.add(dimple1, dimple2);
+            });
+
+            // Glowing Cyan Smile
+            const smile = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.036, 16, 32, Math.PI), matGlow);
             smile.rotation.z = Math.PI;
-            smile.position.set(0, -0.15, 0.82);
-            headMeshGroup.add(eyeL, eyeR, smile);
+            smile.position.set(0, -0.12, 0.79);
+            headMeshGroup.add(eyeL, eyeR, browL, browR, smile);
 
-            const earGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.1, 16);
-            earGeo.rotateZ(Math.PI/2);
-            const earL = new THREE.Mesh(earGeo, matDark);
-            earL.position.set(-0.95, 0, 0);
-            const earR = new THREE.Mesh(earGeo, matDark);
-            earR.position.set(0.95, 0, 0);
-            
-            const antGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5);
-            const antL = new THREE.Mesh(antGeo, matWhite);
-            antL.position.set(-0.9, 0.4, 0);
-            antL.rotation.z = Math.PI/6;
-            const antR = new THREE.Mesh(antGeo, matWhite);
-            antR.position.set(0.9, 0.4, 0);
-            antR.rotation.z = -Math.PI/6;
-            
-            const bulbGeo = new THREE.SphereGeometry(0.08, 16, 16);
-            const bulbL = new THREE.Mesh(bulbGeo, matGlow);
-            bulbL.position.set(-1.02, 0.62, 0);
-            const bulbR = new THREE.Mesh(bulbGeo, matGlow);
-            bulbR.position.set(1.02, 0.62, 0);
+            // Multi-layered Ribbed Ear Hubs with Colored Knobs (from reference)
+            [-1, 1].forEach(sign => {
+                const earHub = new THREE.Group();
+                const basePlate = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.08, 24), matCream);
+                basePlate.rotation.z = Math.PI/2;
+                const midPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.14, 24), matDark);
+                midPlate.rotation.z = Math.PI/2;
+                const buttonTop = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.06, 12), matBootYellow);
+                buttonTop.rotation.z = Math.PI/2;
+                buttonTop.position.set(0.06 * sign, 0.07, 0.06);
+                const buttonBot = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.06, 12), matBootRed);
+                buttonBot.rotation.z = Math.PI/2;
+                buttonBot.position.set(0.06 * sign, -0.07, -0.04);
+                earHub.add(basePlate, midPlate, buttonTop, buttonBot);
+                earHub.position.set(0.95 * sign, 0.02, 0);
+                headMeshGroup.add(earHub);
+            });
 
-            headMeshGroup.add(earL, earR, antL, antR, bulbL, bulbR);
+            // Angled Antennas with Glowing Cyan Orbs
+            const antStalkGeo = new THREE.CylinderGeometry(0.026, 0.045, 0.34, 16);
+            const antBaseGeo = new THREE.SphereGeometry(0.065, 12, 12);
+            const bulbGeo = new THREE.SphereGeometry(0.11, 20, 20);
+
+            const antLGroup = new THREE.Group();
+            antLGroup.position.set(-0.68, 0.56, 0);
+            antLGroup.rotation.z = 0.52;
+            const antLBase = new THREE.Mesh(antBaseGeo, matCream);
+            const antLStalk = new THREE.Mesh(antStalkGeo, matCream);
+            antLStalk.position.y = 0.16;
+            bulbL = new THREE.Mesh(bulbGeo, matGlow);
+            bulbL.position.y = 0.35;
+            antLGroup.add(antLBase, antLStalk, bulbL);
+
+            const antRGroup = new THREE.Group();
+            antRGroup.position.set(0.68, 0.56, 0);
+            antRGroup.rotation.z = -0.52;
+            const antRBase = new THREE.Mesh(antBaseGeo, matCream);
+            const antRStalk = new THREE.Mesh(antStalkGeo, matCream);
+            antRStalk.position.y = 0.16;
+            bulbR = new THREE.Mesh(bulbGeo, matGlow);
+            bulbR.position.y = 0.35;
+            antRGroup.add(antRBase, antRStalk, bulbR);
+
+            headMeshGroup.add(antLGroup, antRGroup);
             headGroup.add(headMeshGroup);
 
-            // Limbs - Using CylinderGeometry for widespread Chromebook compatibility
-            const limbGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.6, 16);
-            
-            armL = new THREE.Group();
-            armL.position.set(-0.75, 0.3, 0);
-            const armLMesh = new THREE.Mesh(limbGeo, matPlastic);
-            armLMesh.position.y = -0.3;
-            armLMesh.castShadow = true;
-            armL.add(armLMesh);
+            // 3. Two-Segment Articulated Arms (Shoulder -> Upper Arm -> Elbow -> Forearm -> Chubby Hand with Fingers!)
+            function buildArticulatedArm(isLeft) {
+                const sign = isLeft ? -1 : 1;
+                const shoulderPivot = new THREE.Group();
+                shoulderPivot.position.set(0.70 * sign, 0.34, 0);
+
+                // Dark Spherical Shoulder Joint
+                const shoulderBall = new THREE.Mesh(new THREE.SphereGeometry(0.17, 20, 20), matDark);
+                shoulderPivot.add(shoulderBall);
+
+                // Upper Arm Segment
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.145, 0.28, 20), matWhite);
+                upperArm.position.y = -0.17;
+                upperArm.castShadow = true;
+                shoulderPivot.add(upperArm);
+
+                // Anchor for upper-arm sleeves
+                const sleeveAnchor = new THREE.Group();
+                shoulderPivot.add(sleeveAnchor);
+
+                // Elbow Joint Pivot
+                const elbowPivot = new THREE.Group();
+                elbowPivot.position.set(0, -0.33, 0);
+                const elbowBall = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 16), matPlastic);
+                elbowPivot.add(elbowBall);
+
+                // Forearm Cuff (tapered armored gauntlet look from reference)
+                const forearmMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.165, 0.28, 20), matWhite);
+                forearmMesh.position.y = -0.16;
+                forearmMesh.castShadow = true;
+                elbowPivot.add(forearmMesh);
+
+                // Chubby Palm + 4 Cute Rounded Fingers
+                const handGroup = new THREE.Group();
+                handGroup.position.y = -0.34;
+                const palm = new THREE.Mesh(new THREE.SphereGeometry(0.145, 18, 18), matWhite);
+                palm.scale.set(1.0, 0.85, 0.72);
+                handGroup.add(palm);
+
+                // Thumb + 3 Fingers
+                const fingerGeo = new THREE.CylinderGeometry(0.036, 0.036, 0.09, 12);
+                const fingerPositions = [
+                    { x: -0.07 * sign, y: -0.08, z: 0.03, rz: 0.25 * sign },
+                    { x: -0.02 * sign, y: -0.11, z: 0.02, rz: 0.05 * sign },
+                    { x: 0.04 * sign, y: -0.10, z: 0.02, rz: -0.1 * sign },
+                    { x: -0.11 * sign, y: -0.02, z: 0.05, rz: 0.65 * sign } // Thumb
+                ];
+                fingerPositions.forEach(fp => {
+                    const fMesh = new THREE.Mesh(fingerGeo, matPlastic);
+                    fMesh.position.set(fp.x, fp.y, fp.z);
+                    fMesh.rotation.z = fp.rz;
+                    handGroup.add(fMesh);
+                });
+
+                elbowPivot.add(handGroup);
+                shoulderPivot.add(elbowPivot);
+
+                return { shoulderPivot, elbowPivot, sleeveAnchor };
+            }
+
+            const leftArmRig = buildArticulatedArm(true);
+            armL = leftArmRig.shoulderPivot;
+            forearmL = leftArmRig.elbowPivot;
+            armLAnchor = leftArmRig.sleeveAnchor;
             bodyGroup.add(armL);
 
-            armR = new THREE.Group();
-            armR.position.set(0.75, 0.3, 0);
-            const armRMesh = new THREE.Mesh(limbGeo, matPlastic);
-            armRMesh.position.y = -0.3;
-            armRMesh.castShadow = true;
-            armR.add(armRMesh);
+            const rightArmRig = buildArticulatedArm(false);
+            armR = rightArmRig.shoulderPivot;
+            forearmR = rightArmRig.elbowPivot;
+            armRAnchor = rightArmRig.sleeveAnchor;
             bodyGroup.add(armR);
 
-            legL = new THREE.Group();
-            legL.position.set(-0.3, -0.8, 0);
-            const legLMesh = new THREE.Mesh(limbGeo, matWhite);
-            legLMesh.position.y = -0.2;
-            legLMesh.castShadow = true;
-            legL.add(legLMesh);
-            
-            const footGeo = new THREE.BoxGeometry(0.3, 0.15, 0.4);
-            const footL = new THREE.Mesh(footGeo, matPlastic);
-            footL.position.set(0, -0.5, 0.05);
-            footL.castShadow = true;
-            legL.add(footL);
-            robotGroup.add(legL);
+            // 4. Stylized Toy Legs & Asymmetrical Color-Blocked Boots (Red Right / Yellow Left as in reference!)
+            function buildStylizedLeg(isLeft) {
+                const sign = isLeft ? -1 : 1;
+                const legGroup = new THREE.Group();
+                legGroup.position.set(0.28 * sign, -0.78, 0);
 
-            legR = new THREE.Group();
-            legR.position.set(0.3, -0.8, 0);
-            const legRMesh = new THREE.Mesh(limbGeo, matWhite);
-            legRMesh.position.y = -0.2;
-            legRMesh.castShadow = true;
-            legR.add(legRMesh);
-            const footR = new THREE.Mesh(footGeo, matPlastic);
-            footR.position.set(0, -0.5, 0.05);
-            footR.castShadow = true;
-            legR.add(footR);
-            robotGroup.add(legR);
+                // Upper Leg + Knee Pad
+                const legCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.38, 20), matWhite);
+                legCyl.position.y = -0.16;
+                legCyl.castShadow = true;
+                const kneePad = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.13, 0.08), matPlastic);
+                kneePad.position.set(0, -0.16, 0.14);
+                legGroup.add(legCyl, kneePad);
+
+                // Chunky Toy Boot with Sole & Colored Toe Block
+                const bootGroup = new THREE.Group();
+                bootGroup.position.set(0, -0.44, 0.05);
+                const bootCuff = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.18, 0.38), matPlastic);
+                const bootToe = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.26, 0.15, 0.24),
+                    isLeft ? matBootRed : matBootYellow
+                );
+                bootToe.position.set(0, -0.01, 0.12);
+                const bootSole = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.06, 0.46), matDark);
+                bootSole.position.set(0, -0.10, 0.03);
+                bootGroup.add(bootCuff, bootToe, bootSole);
+                legGroup.add(bootGroup);
+
+                return legGroup;
+            }
+
+            legL = buildStylizedLeg(true);
+            legR = buildStylizedLeg(false);
+            robotGroup.add(legL, legR);
         }
 
         function buildAccessories() {
-            const mats = {
-                gold: new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.15, metalness: 0.9 }),
-                fabricBlue: new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.9 }),
-                fabricRed: new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.9 }),
-                fabricGreen: new THREE.MeshStandardMaterial({ color: 0x2ecc71, roughness: 0.9 }),
-                fabricDark: new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 }),
-                fabricBrown: new THREE.MeshStandardMaterial({ color: 0x8e44ad, roughness: 0.9 }), 
-                leather: new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.8 }),
-                coat: new THREE.MeshStandardMaterial({ color: 0xd4c6a9, roughness: 0.9 }),
-                black: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 }),
-                white: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
-                glass: new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.1, envMapIntensity: 1.0 }),
-                hairYellow: new THREE.MeshStandardMaterial({ color: 0xf1c40f, roughness: 0.7, flatShading: true })
+            const defaultColors = {
+                fabricBlue: 0x3b82f6,
+                fabricRed: 0xf43f5e,
+                fabricGreen: 0x10b981,
+                fabricDark: 0x4338ca,
+                fabricPurple: 0x8b5cf6,
+                coat: 0xd97706,
+                leather: 0x78350f
             };
 
-            function register(id, type, object) {
+            const mats = {
+                gold: new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.25, metalness: 0.75 }),
+                silver: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.25, metalness: 0.7 }),
+                fabricBlue: new THREE.MeshStandardMaterial({ color: defaultColors.fabricBlue, roughness: 0.55 }),
+                fabricRed: new THREE.MeshStandardMaterial({ color: defaultColors.fabricRed, roughness: 0.55 }),
+                fabricGreen: new THREE.MeshStandardMaterial({ color: defaultColors.fabricGreen, roughness: 0.55 }),
+                fabricDark: new THREE.MeshStandardMaterial({ color: defaultColors.fabricDark, roughness: 0.6 }),
+                fabricBrown: new THREE.MeshStandardMaterial({ color: defaultColors.fabricPurple, roughness: 0.55 }), 
+                leather: new THREE.MeshStandardMaterial({ color: defaultColors.leather, roughness: 0.5 }),
+                coat: new THREE.MeshStandardMaterial({ color: defaultColors.coat, roughness: 0.6 }),
+                black: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.45 }),
+                white: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 }),
+                glass: new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transmission: 0.82, opacity: 1, transparent: true, roughness: 0.08 }),
+                hairYellow: new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.45 })
+            };
+
+            window.dyeableMaterials = [
+                mats.fabricBlue, mats.fabricRed, mats.fabricGreen,
+                mats.fabricDark, mats.fabricBrown, mats.coat, mats.leather
+            ];
+
+            window.resetOutfitDefaultColors = function() {
+                mats.fabricBlue.color.setHex(defaultColors.fabricBlue);
+                mats.fabricRed.color.setHex(defaultColors.fabricRed);
+                mats.fabricGreen.color.setHex(defaultColors.fabricGreen);
+                mats.fabricDark.color.setHex(defaultColors.fabricDark);
+                mats.fabricBrown.color.setHex(defaultColors.fabricPurple);
+                mats.coat.color.setHex(defaultColors.coat);
+                mats.leather.color.setHex(defaultColors.leather);
+            };
+
+            if (outfitPrimaryColor) {
+                setOutfitColor(outfitPrimaryColor);
+            }
+
+            function register(id, type, object, sleeveL = null, sleeveR = null) {
                 object.visible = false;
                 window.accessories3D[id] = object;
-                // Strictly map to correct anchor
                 if(type === 'head') topHeadAnchor.add(object);
                 else if(type === 'face') faceAnchor.add(object);
                 else if(type === 'neck') neckAnchor.add(object);
                 else if(type === 'body') bodyAnchor.add(object);
                 else if(type === 'back') backAnchor.add(object);
+
+                if (sleeveL && sleeveR) {
+                    sleeveL.visible = false;
+                    sleeveR.visible = false;
+                    armLAnchor.add(sleeveL);
+                    armRAnchor.add(sleeveR);
+                    window.sleeveAccessories3D[id] = { L: sleeveL, R: sleeveR };
+                }
             }
 
-            // 1. Cool Cap (topHeadAnchor)
+            // 1. Cool Cap (Sporty Baseball Cap with Button & Visor)
             const cap = new THREE.Group();
-            const capDome = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricBlue);
-            const capBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.05, 16, 1, false, -Math.PI/2.5, Math.PI/1.25), mats.fabricBlue);
-            capBrim.position.set(0, 0, 0.3);
-            cap.add(capDome, capBrim);
-            // topHeadAnchor is at y=0.75. Lower hat slightly to envelop skull.
-            cap.position.y = -0.1;
+            const capDome = new THREE.Mesh(new THREE.SphereGeometry(0.86, 24, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricBlue);
+            capDome.scale.set(1, 0.78, 1);
+            const capButton = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), mats.white);
+            capButton.position.set(0, 0.67, 0);
+            const capBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.88, 0.06, 24, 1, false, -Math.PI/2.8, Math.PI/1.4), mats.fabricBlue);
+            capBrim.position.set(0, 0.04, 0.35);
+            capBrim.rotation.x = 0.12;
+            const capStripe = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.035, 12, 32), mats.white);
+            capStripe.rotation.x = Math.PI/2;
+            capStripe.position.y = 0.04;
+            cap.add(capDome, capButton, capBrim, capStripe);
+            cap.position.y = -0.12;
             register('coolCap', 'head', cap);
 
-            // 2. Nerd Glasses (faceAnchor)
+            // 2. Nerd Glasses (Thick Rim + Center Tape + Clear Lenses)
             const glasses = new THREE.Group();
-            const rimG = new THREE.TorusGeometry(0.28, 0.06, 8, 24);
-            const rimL = new THREE.Mesh(rimG, mats.black); rimL.position.set(-0.4, 0, 0.1);
-            const rimR = new THREE.Mesh(rimG, mats.black); rimR.position.set(0.4, 0, 0.1);
-            const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, 0.05), mats.black); bridge.position.set(0, 0, 0.1);
-            // Temples extending from front (z=0.1) back to ears (z=-0.75 relative to faceAnchor)
-            const templeL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.85), mats.black); templeL.position.set(-0.68, 0, -0.3);
-            const templeR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.85), mats.black); templeR.position.set(0.68, 0, -0.3);
-            glasses.add(rimL, rimR, bridge, templeL, templeR);
+            const rimG = new THREE.TorusGeometry(0.28, 0.055, 16, 32);
+            const rimL = new THREE.Mesh(rimG, mats.black); rimL.position.set(-0.38, 0.06, 0.1);
+            const rimR = new THREE.Mesh(rimG, mats.black); rimR.position.set(0.38, 0.06, 0.1);
+            const lensGL = new THREE.Mesh(new THREE.CircleGeometry(0.25, 24), mats.glass); lensGL.position.set(-0.38, 0.06, 0.1);
+            const lensGR = new THREE.Mesh(new THREE.CircleGeometry(0.25, 24), mats.glass); lensGR.position.set(0.38, 0.06, 0.1);
+            const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.24, 12), mats.black);
+            bridge.rotation.z = Math.PI/2; bridge.position.set(0, 0.1, 0.1);
+            const tape = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.1, 12), mats.white);
+            tape.rotation.z = Math.PI/2; tape.position.set(0, 0.1, 0.1);
+            const templeL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 0.85), mats.black);
+            templeL.position.set(-0.66, 0.08, -0.32);
+            const templeR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 0.85), mats.black);
+            templeR.position.set(0.66, 0.08, -0.32);
+            glasses.add(rimL, rimR, lensGL, lensGR, bridge, tape, templeL, templeR);
             register('nerdGlasses', 'face', glasses);
 
-            // 3. Spiky Hair (topHeadAnchor)
+            // 3. Spiky Hair (Chunky Stylized Toy Hair Locks)
             const hair = new THREE.Group();
-            for(let i=0; i<30; i++) {
-                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6 + Math.random()*0.5, 4), mats.hairYellow);
-                const a = Math.random() * Math.PI * 2;
-                const r = Math.random() * 0.7;
-                spike.position.set(Math.cos(a)*r, 0, Math.sin(a)*r);
-                spike.lookAt(spike.position.x * 2, 1, spike.position.z * 2);
+            const hairBase = new THREE.Mesh(new THREE.SphereGeometry(0.84, 24, 16, 0, Math.PI*2, 0, Math.PI/2.2), mats.hairYellow);
+            hair.add(hairBase);
+            for(let i=0; i<18; i++) {
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.58 + (i%3)*0.15, 12), mats.hairYellow);
+                const a = (i / 18) * Math.PI * 2;
+                const r = (i % 2 === 0) ? 0.52 : 0.28;
+                spike.position.set(Math.cos(a)*r, 0.22, Math.sin(a)*r);
+                spike.lookAt(Math.cos(a)*1.9, 1.15, Math.sin(a)*1.9);
                 spike.rotation.x -= Math.PI/2;
                 hair.add(spike);
             }
-            hair.position.y = -0.15; // sink slightly into skull
+            hair.position.y = -0.14;
             register('spikyHair', 'head', hair);
 
-            // 4. Basic Tee (bodyAnchor)
+            // 4. Student Tee (Puffy Varsity Hoodie/Tee with Ribbed Hems, Pocket & Badge)
             const tee = new THREE.Group();
-            const teeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.8, 32), mats.fabricRed);
-            const teeTop = new THREE.Mesh(new THREE.SphereGeometry(0.62, 32, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricRed);
-            teeTop.position.y = 0.4;
-            const teeBot = new THREE.Mesh(new THREE.SphereGeometry(0.62, 32, 16, 0, Math.PI*2, Math.PI/2, Math.PI/2), mats.fabricRed);
-            teeBot.position.y = -0.4;
-            tee.add(teeBody, teeTop, teeBot);
-            register('basicTee', 'body', tee);
+            const teeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.59, 0.64, 0.72, 32), mats.fabricRed);
+            teeBody.position.y = 0.1;
+            const teeStripe1 = new THREE.Mesh(new THREE.CylinderGeometry(0.615, 0.62, 0.09, 32), mats.white);
+            teeStripe1.position.y = 0.18;
+            const teeStripe2 = new THREE.Mesh(new THREE.CylinderGeometry(0.622, 0.626, 0.05, 32), mats.gold);
+            teeStripe2.position.y = 0.08;
+            const teeCollar = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.075, 16, 32), mats.white);
+            teeCollar.rotation.x = Math.PI/2;
+            teeCollar.position.y = 0.50;
+            const teeHem = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.06, 16, 32), mats.white);
+            teeHem.rotation.x = Math.PI/2;
+            teeHem.position.y = -0.24;
+            // Cute Varsity Chest Patch
+            const teePatch = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.04, 20), mats.gold);
+            teePatch.rotation.x = Math.PI/2;
+            teePatch.position.set(-0.24, 0.28, 0.56);
+            tee.add(teeBody, teeStripe1, teeStripe2, teeCollar, teeHem, teePatch);
 
-            // 5. Gamer Phones (headCenterAnchor) - Exception mapping
+            function makeTeeSleeve() {
+                const slv = new THREE.Group();
+                const sCap = new THREE.Mesh(new THREE.SphereGeometry(0.19, 16, 16), mats.fabricRed);
+                const sMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.19, 0.24, 20), mats.fabricRed);
+                sMesh.position.y = -0.12;
+                const sCuff = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.038, 12, 24), mats.white);
+                sCuff.rotation.x = Math.PI/2;
+                sCuff.position.y = -0.23;
+                slv.add(sCap, sMesh, sCuff);
+                return slv;
+            }
+            register('basicTee', 'body', tee, makeTeeSleeve(), makeTeeSleeve());
+
+            // 5. Gamer Phones (Cushioned RGB Headphones + Boom Mic)
             const phones = new THREE.Group();
-            const band = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.08, 16, 32, Math.PI), mats.black);
-            band.position.set(0, 0.1, 0); // Arch over head
-            const cupGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 32);
-            const cupL = new THREE.Mesh(cupGeo, mats.fabricGreen); cupL.rotation.z = Math.PI/2; cupL.position.set(-1.05, 0.1, 0);
-            const cupR = new THREE.Mesh(cupGeo, mats.fabricGreen); cupR.rotation.z = Math.PI/2; cupR.position.set(1.05, 0.1, 0);
-            phones.add(band, cupL, cupR);
-            // We register to headCenterAnchor manually instead of topHeadAnchor to use radius dimensions
+            const band = new THREE.Mesh(new THREE.TorusGeometry(1.02, 0.065, 16, 32, Math.PI), mats.black);
+            band.position.set(0, 0.05, 0);
+            const padTop = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.08, 12, 24, Math.PI/3), mats.fabricGreen);
+            padTop.rotation.z = Math.PI/3;
+            padTop.position.set(0, 0.05, 0);
+            const cupGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.16, 24);
+            const cushionGeo = new THREE.TorusGeometry(0.26, 0.07, 12, 24);
+            const glowRingGeo = new THREE.TorusGeometry(0.29, 0.02, 12, 24);
+
+            const cupL = new THREE.Mesh(cupGeo, mats.black); cupL.rotation.z = Math.PI/2; cupL.position.set(-1.05, 0.05, 0);
+            const cushL = new THREE.Mesh(cushionGeo, mats.fabricGreen); cushL.rotation.y = Math.PI/2; cushL.position.set(-0.96, 0.05, 0);
+            const ringL = new THREE.Mesh(glowRingGeo, new THREE.MeshBasicMaterial({color: 0x00ffcc})); ringL.rotation.y = Math.PI/2; ringL.position.set(-1.14, 0.05, 0);
+
+            const cupR = new THREE.Mesh(cupGeo, mats.black); cupR.rotation.z = Math.PI/2; cupR.position.set(1.05, 0.05, 0);
+            const cushR = new THREE.Mesh(cushionGeo, mats.fabricGreen); cushR.rotation.y = Math.PI/2; cushR.position.set(0.96, 0.05, 0);
+            const ringR = new THREE.Mesh(glowRingGeo, new THREE.MeshBasicMaterial({color: 0x00ffcc})); ringR.rotation.y = Math.PI/2; ringR.position.set(1.14, 0.05, 0);
+
+            const micBoom = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6), mats.black);
+            micBoom.rotation.x = Math.PI/2.5; micBoom.position.set(-0.98, -0.1, 0.35);
+            const micTip = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), mats.fabricGreen);
+            micTip.position.set(-0.98, -0.2, 0.62);
+
+            phones.add(band, padTop, cupL, cushL, ringL, cupR, cushR, ringR, micBoom, micTip);
             phones.visible = false;
             window.accessories3D['headphones'] = phones;
             headCenterAnchor.add(phones);
 
-            // 6. Winter Scarf (neckAnchor)
+            // 6. Winter Scarf (Cozy Double-Wrapped Scarf with Fringe)
             const scarf = new THREE.Group();
-            const scarfRing = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.18, 16, 32), mats.fabricRed);
-            scarfRing.rotation.x = Math.PI/2; // Lay flat
-            // A Cylinder instead of Capsule to fix Chromebook r128 compat
-            const scarfTail = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.7, 16), mats.fabricRed);
-            scarfTail.position.set(0.4, -0.4, 0.5); scarfTail.rotation.z = -0.2; scarfTail.rotation.x = 0.2;
-            scarf.add(scarfRing, scarfTail);
+            const scarfRing1 = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.15, 16, 32), mats.fabricRed);
+            scarfRing1.rotation.x = Math.PI/2;
+            const scarfRing2 = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.13, 16, 32), mats.white);
+            scarfRing2.rotation.x = Math.PI/2; scarfRing2.position.y = -0.1;
+            const scarfTail = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.65, 0.08), mats.fabricRed);
+            scarfTail.position.set(0.32, -0.42, 0.56); scarfTail.rotation.z = -0.15; scarfTail.rotation.x = -0.15;
+            const tailStripe = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, 0.09), mats.white);
+            tailStripe.position.set(0, -0.2, 0);
+            scarfTail.add(tailStripe);
+            scarf.add(scarfRing1, scarfRing2, scarfTail);
             register('scarf', 'neck', scarf);
 
-            // 7. 3D Glasses (faceAnchor)
+            // 7. 3D Glasses (Retro Cinema Glasses)
             const glasses3d = new THREE.Group();
-            const frame = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.3, 0.05), mats.white);
-            frame.position.set(0, 0, 0.1);
-            const lensL = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.2), new THREE.MeshBasicMaterial({color: 0xff0000, transparent:true, opacity:0.8}));
-            lensL.position.set(-0.3, 0, 0.13);
-            const lensR = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.2), new THREE.MeshBasicMaterial({color: 0x0000ff, transparent:true, opacity:0.8}));
-            lensR.position.set(0.3, 0, 0.13);
-            const t3dL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.85), mats.white); t3dL.position.set(-0.62, 0, -0.3);
-            const t3dR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.85), mats.white); t3dR.position.set(0.62, 0, -0.3);
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(1.32, 0.34, 0.06), mats.white);
+            frame.position.set(0, 0.06, 0.1);
+            const lensL = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.22), new THREE.MeshBasicMaterial({color: 0xff0055, transparent:true, opacity:0.85}));
+            lensL.position.set(-0.32, 0.06, 0.135);
+            const lensR = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.22), new THREE.MeshBasicMaterial({color: 0x00bbff, transparent:true, opacity:0.85}));
+            lensR.position.set(0.32, 0.06, 0.135);
+            const t3dL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.85), mats.white); t3dL.position.set(-0.64, 0.06, -0.3);
+            const t3dR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.85), mats.white); t3dR.position.set(0.64, 0.06, -0.3);
             glasses3d.add(frame, lensL, lensR, t3dL, t3dR);
             register('3dGlasses', 'face', glasses3d);
 
-            // 8. Propeller Hat (topHeadAnchor)
+            // 8. Propeller Hat (Multi-Paneled Beanie + Spinning Blades)
             const beanie = new THREE.Group();
-            const bDome = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricGreen);
-            const bPin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2), mats.black); bPin.position.y = 0.9;
-            const bProp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.1), mats.fabricRed); bProp.position.y = 1.0;
+            const bDome = new THREE.Mesh(new THREE.SphereGeometry(0.84, 24, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricGreen);
+            bDome.scale.set(1, 0.85, 1);
+            const bRim = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.08, 12, 32), mats.gold);
+            bRim.rotation.x = Math.PI/2;
+            const bPin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.25), mats.silver); bPin.position.y = 0.78;
+            const bHub = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), mats.fabricRed); bHub.position.y = 0.92;
+            const bProp = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.025, 0.12), mats.fabricRed); bProp.position.y = 0.9;
             bProp.userData.isPropeller = true; 
-            beanie.add(bDome, bPin, bProp);
+            beanie.add(bDome, bRim, bPin, bHub, bProp);
             beanie.position.y = -0.1;
             register('beanie', 'head', beanie);
 
-            // 9. Pirate Patch (faceAnchor)
+            // 9. Pirate Eye Patch (Molded Patch + Angled Head Strap)
             const patch = new THREE.Group();
-            const pCover = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), mats.black);
-            pCover.rotation.x = Math.PI/2; pCover.position.set(-0.35, 0.1, 0.1);
-            const pBand = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.02, 32, 1, true), mats.black);
-            pBand.position.set(0, 0.1, -0.75); // Centers the band back around the origin of the head
-            patch.add(pCover, pBand);
+            const pPad = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), mats.black);
+            pPad.scale.set(1.1, 0.9, 0.35);
+            pPad.position.set(-0.34, 0.08, 0.06);
+            const pStrap = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.032, 12, 32), mats.black);
+            pStrap.position.set(0, 0.08, -0.75);
+            pStrap.rotation.x = Math.PI/2 + 0.18;
+            pStrap.rotation.y = 0.22;
+            patch.add(pPad, pStrap);
             register('eyePatch', 'face', patch);
 
-            // 10. Detective Coat (bodyAnchor)
+            // 10. Detective Coat (Tailored Puffy Toy Trench Coat with Storm Flaps, Pockets, Belt & Buckle)
             const coat = new THREE.Group();
-            const cBody = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.8, 1.2, 16), mats.coat);
-            const cCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.66, 0.2, 16, 1, true), mats.coat);
-            cCollar.position.y = 0.6;
-            coat.add(cBody, cCollar);
-            register('trenchCoat', 'body', coat);
+            const cBody = new THREE.Mesh(new THREE.CylinderGeometry(0.60, 0.74, 0.98, 32), mats.coat);
+            cBody.position.y = 0.0;
+            const cHem = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.05, 14, 32), mats.coat);
+            cHem.rotation.x = Math.PI/2;
+            cHem.position.y = -0.47;
+            const cCollar = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.11, 16, 32, Math.PI*1.35), mats.coat);
+            cCollar.rotation.x = Math.PI/2;
+            cCollar.rotation.z = Math.PI * 0.82;
+            cCollar.position.y = 0.52;
+            // Belt & Recessed Gold Buckle
+            const cBelt = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.065, 14, 32), mats.leather);
+            cBelt.rotation.x = Math.PI/2;
+            cBelt.position.y = -0.10;
+            const cBuckle = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.17, 0.07), mats.gold);
+            cBuckle.position.set(0, -0.10, 0.69);
+            const cBuckleInner = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.09, 0.08), mats.leather);
+            cBuckleInner.position.set(0, -0.10, 0.69);
+            // Side Pockets
+            const pocketL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.06), mats.coat);
+            pocketL.position.set(-0.46, -0.25, 0.50); pocketL.rotation.y = -0.6;
+            const pocketR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.06), mats.coat);
+            pocketR.position.set(0.46, -0.25, 0.50); pocketR.rotation.y = 0.6;
+            // Lapels & Double-Breasted Buttons
+            const lapelL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.44, 0.06), mats.coat);
+            lapelL.position.set(-0.21, 0.24, 0.60); lapelL.rotation.z = 0.24;
+            const lapelR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.44, 0.06), mats.coat);
+            lapelR.position.set(0.21, 0.24, 0.60); lapelR.rotation.z = -0.24;
+            for(let b=0; b<3; b++) {
+                const btnL = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.03, 14), mats.leather);
+                btnL.rotation.x = Math.PI/2;
+                btnL.position.set(-0.15, 0.25 - b*0.18, 0.65 + b*0.02);
+                const btnR = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.03, 14), mats.leather);
+                btnR.rotation.x = Math.PI/2;
+                btnR.position.set(0.15, 0.25 - b*0.18, 0.65 + b*0.02);
+                coat.add(btnL, btnR);
+            }
+            coat.add(cBody, cHem, cCollar, cBelt, cBuckle, cBuckleInner, pocketL, pocketR, lapelL, lapelR);
 
-            // 11. Explorer Hat (topHeadAnchor)
+            function makeCoatSleeve() {
+                const slv = new THREE.Group();
+                const sEpaulette = new THREE.Mesh(new THREE.SphereGeometry(0.195, 16, 16), mats.coat);
+                const sMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.185, 0.20, 0.28, 20), mats.coat);
+                sMesh.position.y = -0.15;
+                const sStrap = new THREE.Mesh(new THREE.TorusGeometry(0.195, 0.035, 12, 24), mats.leather);
+                sStrap.rotation.x = Math.PI/2;
+                sStrap.position.y = -0.26;
+                slv.add(sEpaulette, sMesh, sStrap);
+                return slv;
+            }
+            register('trenchCoat', 'body', coat, makeCoatSleeve(), makeCoatSleeve());
+
+            // 11. Explorer Hat (Safari Fedora with Leather Ribbon)
             const expHat = new THREE.Group();
-            const exDome = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16, 0, Math.PI*2, 0, Math.PI/2), mats.leather);
-            exDome.scale.y = 0.8;
-            const exBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.05, 24), mats.leather);
-            expHat.add(exDome, exBrim);
+            const exDome = new THREE.Mesh(new THREE.SphereGeometry(0.82, 24, 16, 0, Math.PI*2, 0, Math.PI/2), mats.leather);
+            exDome.scale.set(1, 0.75, 1);
+            const exRibbon = new THREE.Mesh(new THREE.TorusGeometry(0.81, 0.06, 12, 32), mats.gold);
+            exRibbon.rotation.x = Math.PI/2; exRibbon.position.y = 0.05;
+            const exBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.38, 1.38, 0.06, 32), mats.leather);
+            expHat.add(exDome, exRibbon, exBrim);
             expHat.position.y = -0.05;
             register('explorerHat', 'head', expHat);
 
-            // 12. Ninja Mask (faceAnchor)
+            // 12. Ninja Mask (Stealth Wrap + Metal Forehead Plate)
             const ninja = new THREE.Group();
-            // Covers lower half of head
-            const nMask = new THREE.Mesh(new THREE.CylinderGeometry(0.96, 0.96, 0.5, 32, 1, true, -Math.PI/2, Math.PI), mats.black);
-            nMask.position.set(0, -0.2, -0.75); 
-            ninja.add(nMask);
+            const nMask = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.92, 0.48, 32, 1, false, -Math.PI/1.8, Math.PI*1.1), mats.black);
+            nMask.position.set(0, -0.22, -0.75); 
+            const nBand = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.05, 12, 32), mats.fabricRed);
+            nBand.rotation.x = Math.PI/2; nBand.position.set(0, 0.35, -0.75);
+            const nPlate = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.14, 0.06), mats.silver);
+            nPlate.position.set(0, 0.35, 0.16);
+            ninja.add(nMask, nBand, nPlate);
             register('ninjaMask', 'face', ninja);
 
-            // 13. Wizard Hat (topHeadAnchor)
+            // 13. Wizard Hat (Bent Segmented Cone + Gold Buckle Belt)
             const wizHat = new THREE.Group();
-            const wBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.05, 32), mats.fabricDark);
-            const wCone = new THREE.Mesh(new THREE.ConeGeometry(0.9, 2.0, 16), mats.fabricDark);
-            wCone.position.set(0, 1.0, -0.2); // Shift point backwards
-            wCone.rotation.x = -0.2; 
-            wizHat.add(wBrim, wCone);
+            const wBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.48, 1.48, 0.06, 32), mats.fabricDark);
+            const wBand = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.08, 12, 32), mats.gold);
+            wBand.rotation.x = Math.PI/2; wBand.position.y = 0.06;
+            const wCone1 = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.9, 0.85, 24), mats.fabricDark);
+            wCone1.position.set(0, 0.42, 0);
+            const wCone2 = new THREE.Mesh(new THREE.ConeGeometry(0.56, 1.1, 24), mats.fabricDark);
+            wCone2.position.set(0, 1.25, -0.22);
+            wCone2.rotation.x = -0.38;
+            wizHat.add(wBrim, wBand, wCone1, wCone2);
             wizHat.position.y = -0.05;
             register('wizardHat', 'head', wizHat);
 
-            // 14. Magic Robe (bodyAnchor)
+            // 14. Magic Robe (Plush Arcane Robe with Golden Collar, Rune Belt & Bell Sleeves)
             const robe = new THREE.Group();
-            const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.85, 1.3, 16), mats.fabricBrown);
-            for(let i=0; i<8; i++) {
-                const star = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), mats.gold);
-                const angle = (i/8)*Math.PI*2;
-                star.position.set(Math.cos(angle)*0.75, (i%2==0)?0.3:-0.3, Math.sin(angle)*0.75);
-                rBody.add(star);
-            }
-            robe.add(rBody);
-            register('wizardRobe', 'body', robe);
+            const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.60, 0.80, 1.02, 32), mats.fabricBrown);
+            rBody.position.y = -0.02;
+            const rTrimCenter = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.02, 0.08), mats.gold);
+            rTrimCenter.position.set(0, -0.02, 0.68);
+            rTrimCenter.rotation.x = -0.18;
+            const rCollar = new THREE.Mesh(new THREE.TorusGeometry(0.49, 0.10, 16, 32), mats.gold);
+            rCollar.rotation.x = Math.PI/2; rCollar.position.y = 0.50;
+            const rSash = new THREE.Mesh(new THREE.TorusGeometry(0.67, 0.06, 14, 32), mats.gold);
+            rSash.rotation.x = Math.PI/2; rSash.position.y = -0.08;
+            const rHem = new THREE.Mesh(new THREE.TorusGeometry(0.79, 0.055, 14, 32), mats.gold);
+            rHem.rotation.x = Math.PI/2; rHem.position.y = -0.51;
 
-            // 15. Hero Cape (backAnchor)
+            for(let i=0; i<10; i++) {
+                const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.068, 0), mats.gold);
+                const angle = (i/10)*Math.PI*2;
+                if (Math.abs(angle - Math.PI/2) > 0.4) {
+                    const rad = (i%2===0) ? 0.69 : 0.74;
+                    star.position.set(Math.cos(angle)*rad, (i%2===0)?0.16:-0.28, Math.sin(angle)*rad);
+                    robe.add(star);
+                }
+            }
+            robe.add(rBody, rTrimCenter, rCollar, rSash, rHem);
+
+            function makeRobeSleeve() {
+                const slv = new THREE.Group();
+                const sShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.195, 16, 16), mats.fabricBrown);
+                const sMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 0.28, 20), mats.fabricBrown);
+                sMesh.position.y = -0.15;
+                const sTrim = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.038, 12, 24), mats.gold);
+                sTrim.rotation.x = Math.PI/2;
+                sTrim.position.y = -0.28;
+                slv.add(sShoulder, sMesh, sTrim);
+                return slv;
+            }
+            register('wizardRobe', 'body', robe, makeRobeSleeve(), makeRobeSleeve());
+
+            // 15. Hero Cape (Royal Flowing Cape with Gold Shoulder Clasps)
             const cape = new THREE.Group();
-            const cCloth = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.4, 0.05), mats.fabricRed);
-            cCloth.position.set(0, -0.5, -0.1);
-            cape.rotation.x = 0.2; 
-            cape.add(cCloth);
+            const cCloth = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.95, 1.45, 24, 1, false, -Math.PI/3, Math.PI/1.5), mats.fabricRed);
+            cCloth.rotation.y = Math.PI;
+            cCloth.position.set(0, -0.5, 0.25);
+            cCloth.rotation.x = 0.22;
+            const claspL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 16), mats.gold);
+            claspL.rotation.x = Math.PI/2; claspL.position.set(-0.38, 0.2, 0.45);
+            const claspR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 16), mats.gold);
+            claspR.rotation.x = Math.PI/2; claspR.position.set(0.38, 0.2, 0.45);
+            cape.add(cCloth, claspL, claspR);
             register('heroCape', 'back', cape);
 
-            // 16. Astro Helmet (headCenterAnchor) - Complete Procedural Overhaul
+            // 16. Astro Helmet (Space Dome + Gold Visor Rim)
             const astro = new THREE.Group();
-            // Outer Visor (Transparent Glass)
-            const aGlass = new THREE.Mesh(new THREE.SphereGeometry(1.25, 32, 32), mats.glass);
-            // Inner Shell (Opaque, covers back and top, leaves front open)
-            // phiStart=PI/4, phiLength=1.5*PI cuts out a 90 deg wedge at the front
-            const aShell = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32, Math.PI * 0.25, Math.PI * 1.5), mats.white);
-            // Base sealing ring
-            const aRing = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.15, 16, 32), mats.white);
+            const aGlass = new THREE.Mesh(new THREE.SphereGeometry(1.22, 32, 32), mats.glass);
+            const aShell = new THREE.Mesh(new THREE.SphereGeometry(1.18, 32, 32, Math.PI * 0.25, Math.PI * 1.5), mats.white);
+            const aRing = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.14, 16, 32), mats.silver);
             aRing.rotation.x = Math.PI / 2;
-            aRing.position.y = -0.8;
+            aRing.position.y = -0.68;
             astro.add(aGlass, aShell, aRing);
             astro.visible = false;
             window.accessories3D['astronaut'] = astro;
-            headCenterAnchor.add(astro); // Attach to center of head
+            headCenterAnchor.add(astro);
 
-            // 17. Royal Crown (topHeadAnchor) - Procedural Fixes
+            // 17. Royal Crown (Velvet Cushion + Golden Peaks & Jewels)
             const crown = new THREE.Group();
-            const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.75, 0.2, 32), mats.gold);
-            for(let i=0; i<6; i++){
-                const angle = (i/6)*Math.PI*2;
-                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.6, 16), mats.gold);
-                spike.position.set(Math.cos(angle)*0.65, 0.3, Math.sin(angle)*0.65);
-                spike.rotation.x = -Math.cos(angle)*0.15;
-                spike.rotation.z = Math.sin(angle)*0.15;
-                const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), (i%2===0) ? mats.fabricRed : mats.fabricBlue);
-                jewel.position.set(0, 0.35, 0);
+            const cVelvet = new THREE.Mesh(new THREE.SphereGeometry(0.68, 24, 16, 0, Math.PI*2, 0, Math.PI/2), mats.fabricRed);
+            cVelvet.scale.set(1, 0.6, 1);
+            const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.72, 0.28, 32), mats.gold);
+            cBase.position.y = 0.1;
+            const cRimBot = new THREE.Mesh(new THREE.TorusGeometry(0.73, 0.05, 12, 32), mats.gold);
+            cRimBot.rotation.x = Math.PI/2;
+            for(let i=0; i<8; i++){
+                const angle = (i/8)*Math.PI*2;
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.45, 12), mats.gold);
+                spike.position.set(Math.cos(angle)*0.72, 0.38, Math.sin(angle)*0.72);
+                const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), (i%2===0) ? mats.fabricRed : mats.fabricBlue);
+                jewel.position.set(0, 0.24, 0);
+                const sideGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.06, 0), mats.fabricGreen);
+                sideGem.position.set(Math.cos(angle)*0.76, 0.1, Math.sin(angle)*0.76);
                 spike.add(jewel);
-                crown.add(spike);
+                crown.add(spike, sideGem);
             }
-            crown.add(cBase);
-            crown.position.y = -0.1;
+            crown.add(cVelvet, cBase, cRimBot);
+            crown.position.y = -0.08;
             register('kingCrown', 'head', crown);
 
-            // 18. Champion Medal (neckAnchor)
+            // 18. Champion Medal (Ribbons + Star-Embossed Gold Coin)
             const medalGroup = new THREE.Group();
-            const mRibbon = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.06, 16, 32), mats.fabricBlue);
-            mRibbon.rotation.x = Math.PI / 2;
-            mRibbon.rotation.x -= 0.2; // Drapes down
-            mRibbon.position.set(0, -0.1, 0.1);
-            const mCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 32), mats.gold);
+            const mRibbon = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.065, 16, 32), mats.fabricBlue);
+            mRibbon.rotation.x = Math.PI / 2 - 0.35;
+            mRibbon.position.set(0, -0.08, 0.12);
+            const mCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.06, 32), mats.gold);
             mCoin.rotation.x = Math.PI / 2;
-            mCoin.position.set(0, -0.7, 0.78); // Hangs clear of the chest
-            medalGroup.add(mRibbon, mCoin);
+            mCoin.position.set(0, -0.35, 0.72);
+            const mStar = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), mats.white);
+            mStar.position.set(0, -0.35, 0.76);
+            medalGroup.add(mRibbon, mCoin, mStar);
             register('goldenMedal', 'neck', medalGroup);
 
-            // 19. Dragon Wings (backAnchor) - Stylized geometric wings
+            // 19. Dragon Wings (Articulated Bat/Dragon Bone Wings + Membranes)
             const wings = new THREE.Group();
             function makeWing(isLeft) {
                 const wg = new THREE.Group();
                 const sign = isLeft ? -1 : 1;
-                const spar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.02, 1.8), mats.fabricDark);
-                spar.rotation.z = (Math.PI / 3) * sign;
-                spar.position.set(0.7 * sign, 0.6, 0);
-                const m1 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.2, 0.05), mats.fabricGreen);
-                m1.position.set(0.7 * sign, 0.1, 0);
-                m1.rotation.z = (Math.PI / 6) * sign;
-                const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.05), mats.fabricGreen);
-                m2.position.set(1.4 * sign, 0.3, 0);
-                m2.rotation.z = (Math.PI / 4) * sign;
-                wg.add(spar, m1, m2);
+                const bone1 = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.04, 1.1), mats.fabricDark);
+                bone1.rotation.z = -0.8 * sign;
+                bone1.position.set(0.4 * sign, 0.35, 0);
+                const joint = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), mats.gold);
+                joint.position.set(0.8 * sign, 0.72, 0);
+                const claw = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 8), mats.gold);
+                claw.position.set(0.8 * sign, 0.88, 0);
+                const bone2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.02, 1.2), mats.fabricDark);
+                bone2.rotation.z = -1.3 * sign;
+                bone2.position.set(1.35 * sign, 0.55, 0);
+
+                // Wing Membranes
+                const mem1 = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.2, 3), mats.fabricGreen);
+                mem1.scale.z = 0.15;
+                mem1.rotation.z = Math.PI + (0.6 * sign);
+                mem1.position.set(0.6 * sign, 0.1, -0.03);
+
+                const mem2 = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.1, 3), mats.fabricGreen);
+                mem2.scale.z = 0.15;
+                mem2.rotation.z = Math.PI + (1.1 * sign);
+                mem2.position.set(1.25 * sign, 0.2, -0.03);
+
+                wg.add(bone1, joint, claw, bone2, mem1, mem2);
+                wg.userData.isWing = sign;
                 return wg;
             }
             wings.add(makeWing(true), makeWing(false));
@@ -1380,19 +1830,106 @@
             const time = clock.getElapsedTime();
             
             if(robotGroup && !isInspectorActive) {
-                // Idle breathing animation
-                robotGroup.position.y = Math.sin(time * 2) * 0.05;
-                bodyGroup.scale.y = 1.0 + Math.sin(time * 4) * 0.02;
-                
-                // Head idle sway
-                headGroup.rotation.y = Math.sin(time * 0.5) * 0.15;
-                headGroup.rotation.z = Math.sin(time * 0.8) * 0.05;
+                // Periodic Natural Eye Blinking
+                const blinkCycle = time % 3.8;
+                const eyeScaleY = (blinkCycle > 3.65) ? 0.12 : 1.0;
+                if (eyeL && eyeR) {
+                    eyeL.scale.y = eyeScaleY;
+                    eyeR.scale.y = eyeScaleY;
+                }
 
-                // Arm swinging
-                armL.rotation.x = Math.sin(time * 2) * 0.1;
-                armR.rotation.x = -Math.sin(time * 2) * 0.1;
-                armL.rotation.z = 0.1 + Math.sin(time * 1.5) * 0.05;
-                armR.rotation.z = -0.1 - Math.sin(time * 1.5) * 0.05;
+                // Antenna Bulb Pulse
+                if (bulbL && bulbR) {
+                    const pulse = 1 + Math.sin(time * 5) * 0.14;
+                    bulbL.scale.set(pulse, pulse, pulse);
+                    bulbR.scale.set(pulse, pulse, pulse);
+                }
+
+                if (currentAnimMode === 'idle') {
+                    // Friendly Breathing & Relaxed Natural Stance
+                    robotGroup.position.y = Math.sin(time * 2.4) * 0.04;
+                    robotGroup.position.x = 0;
+                    bodyGroup.rotation.z = 0;
+                    bodyGroup.scale.y = 1.0 + Math.sin(time * 4.8) * 0.012;
+                    headGroup.rotation.set(Math.sin(time * 1.5) * 0.04, Math.sin(time * 0.9) * 0.16, Math.sin(time * 1.2) * 0.04);
+
+                    // Arms hang outward with gentle forward elbow bend (zero clipping)
+                    armL.rotation.set(Math.sin(time * 2.4) * 0.10, 0, -0.22 - Math.sin(time * 2) * 0.04);
+                    armR.rotation.set(-Math.sin(time * 2.4) * 0.10, 0, 0.22 + Math.sin(time * 2) * 0.04);
+                    if (forearmL && forearmR) {
+                        forearmL.rotation.set(-0.28, 0, 0.08);
+                        forearmR.rotation.set(-0.28, 0, -0.08);
+                    }
+                    if (browL && browR) {
+                        browL.position.y = 0.33 + Math.sin(time * 2) * 0.01;
+                        browR.position.y = 0.33 + Math.sin(time * 2) * 0.01;
+                    }
+                    legL.position.y = -0.78; legR.position.y = -0.78;
+                    legL.rotation.x = 0; legR.rotation.x = 0;
+                } 
+                else if (currentAnimMode === 'dance') {
+                    // Groove Dance: Rhythmic alternating arm swings & knee bounces without head collision
+                    const beat = time * 6.5;
+                    robotGroup.position.y = Math.abs(Math.sin(beat)) * 0.14;
+                    robotGroup.position.x = Math.sin(beat * 0.5) * 0.10;
+                    bodyGroup.rotation.z = Math.sin(beat * 0.5) * 0.09;
+                    bodyGroup.scale.y = 1.0 - Math.abs(Math.cos(beat)) * 0.03;
+                    headGroup.rotation.set(Math.abs(Math.sin(beat)) * 0.08, Math.sin(beat * 0.5) * 0.28, -Math.sin(beat * 0.5) * 0.10);
+
+                    // Outward shoulder swing (negative Z for Left, positive Z for Right prevents hitting head)
+                    armL.rotation.set(-0.45 + Math.sin(beat) * 0.45, 0, -0.45 - Math.abs(Math.cos(beat * 0.5)) * 0.35);
+                    armR.rotation.set(-0.45 - Math.sin(beat) * 0.45, 0, 0.45 + Math.abs(Math.sin(beat * 0.5)) * 0.35);
+                    if (forearmL && forearmR) {
+                        forearmL.rotation.set(-0.65 + Math.cos(beat) * 0.25, 0, 0.15);
+                        forearmR.rotation.set(-0.65 - Math.cos(beat) * 0.25, 0, -0.15);
+                    }
+                    legL.position.y = -0.78 + Math.max(0, Math.sin(beat)) * 0.14;
+                    legR.position.y = -0.78 + Math.max(0, -Math.sin(beat)) * 0.14;
+                    legL.rotation.x = Math.sin(beat) * 0.18;
+                    legR.rotation.x = -Math.sin(beat) * 0.18;
+                } 
+                else if (currentAnimMode === 'cheer') {
+                    // Happy Victory Jump: Arms form a natural wide 'V' outward, elbows bent playfully
+                    const jump = Math.abs(Math.sin(time * 5.5));
+                    robotGroup.position.y = jump * 0.28;
+                    robotGroup.position.x = 0;
+                    bodyGroup.rotation.z = 0;
+                    headGroup.rotation.set(-0.14 * jump, Math.sin(time * 3) * 0.15, 0);
+
+                    // Negative Z on armL (-1.85 rad) & Positive Z on armR (+1.85 rad) lifts arms OUTWARD away from head!
+                    armL.rotation.set(-0.25, 0, -1.75 - Math.sin(time * 11) * 0.18);
+                    armR.rotation.set(-0.25, 0, 1.75 + Math.sin(time * 11) * 0.18);
+                    if (forearmL && forearmR) {
+                        forearmL.rotation.set(-0.35, 0, -0.25 + Math.sin(time * 11) * 0.15);
+                        forearmR.rotation.set(-0.35, 0, 0.25 - Math.sin(time * 11) * 0.15);
+                    }
+                    if (browL && browR) {
+                        browL.position.y = 0.36;
+                        browR.position.y = 0.36;
+                    }
+                    legL.position.y = -0.78; legR.position.y = -0.78;
+                    legL.rotation.x = -jump * 0.25;
+                    legR.rotation.x = jump * 0.25;
+                } 
+                else if (currentAnimMode === 'wave') {
+                    // Signature Reference Pose! Right arm waves hello while Left hand rests on hip
+                    robotGroup.position.y = Math.sin(time * 2.5) * 0.04;
+                    robotGroup.position.x = 0;
+                    bodyGroup.rotation.z = -0.04;
+                    headGroup.rotation.set(0.02, -0.12, -0.08);
+
+                    // Left arm resting on hip (like reference image)
+                    armL.rotation.set(0.15, 0, -0.52);
+                    if (forearmL) forearmL.rotation.set(-0.45, 0, 0.85);
+
+                    // Right arm raised outward to the side, waving from the elbow!
+                    armR.rotation.set(-0.35, 0, 1.35);
+                    if (forearmR) {
+                        forearmR.rotation.set(-0.45, 0, 0.35 + Math.sin(time * 10) * 0.32);
+                    }
+                    legL.position.y = -0.78; legR.position.y = -0.78;
+                    legL.rotation.x = 0; legR.rotation.x = 0;
+                }
             }
 
             // Animate Propeller hat if equipped and active
@@ -1400,7 +1937,19 @@
                 const beanie = window.accessories3D['beanie'];
                 if(beanie.visible) {
                     beanie.children.forEach(c => {
-                        if(c.userData.isPropeller) c.rotation.y -= 10 * delta;
+                        if(c.userData.isPropeller) c.rotation.y -= 12 * delta;
+                    });
+                }
+            }
+
+            // Animate Dragon Wings flapping gently
+            if(window.accessories3D && window.accessories3D['dragonWings']) {
+                const dw = window.accessories3D['dragonWings'];
+                if(dw.visible) {
+                    dw.children.forEach(wing => {
+                        if(wing.userData.isWing) {
+                            wing.rotation.y = wing.userData.isWing * Math.sin(time * 5) * 0.25;
+                        }
                     });
                 }
             }
@@ -1430,8 +1979,12 @@
                 robotGroup.position.y = 0;
                 bodyGroup.scale.y = 1;
                 headGroup.rotation.set(0,0,0);
-                armL.rotation.set(0,0,0);
-                armR.rotation.set(0,0,0);
+                armL.rotation.set(0, 0, -0.22);
+                armR.rotation.set(0, 0, 0.22);
+                if (forearmL && forearmR) {
+                    forearmL.rotation.set(0, 0, 0);
+                    forearmR.rotation.set(0, 0, 0);
+                }
 
                 setTimeout(() => { if(window.resize3D) window.resize3D(); }, 100);
             } else {
